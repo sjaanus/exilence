@@ -3,7 +3,7 @@ import { CharMapsComponent } from './char-maps.component';
 import { SharedModule } from '../../../../shared/shared.module';
 import { MapTableModule } from '../../map-table/map-table.module';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { MatInputModule, MatButtonModule } from '@angular/material';
+import { MatInputModule, MatButtonModule, MatMenuModule, MatIconModule } from '@angular/material';
 
 @NgModule({
   imports: [
@@ -12,7 +12,9 @@ import { MatInputModule, MatButtonModule } from '@angular/material';
     FormsModule,
     ReactiveFormsModule,
     MatInputModule,
-    MatButtonModule
+    MatButtonModule,
+    MatMenuModule,
+    MatIconModule
   ],
   declarations: [CharMapsComponent],
   exports: [CharMapsComponent]

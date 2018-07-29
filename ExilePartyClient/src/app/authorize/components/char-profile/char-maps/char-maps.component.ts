@@ -10,6 +10,7 @@ import * as moment from 'moment';
 import { SettingsService } from '../../../../shared/providers/settings.service';
 import { MapService } from '../../../../shared/providers/map.service';
 import { AccountService } from '../../../../shared/providers/account.service';
+import { RobotService } from '../../../../shared/providers/robot.service';
 
 @Component({
   selector: 'app-char-maps',
@@ -21,7 +22,7 @@ export class CharMapsComponent implements OnInit {
   @Input() player: Player;
 
   averageTimeSpent = '';
-  filteredArr = [];
+  filteredArr: ExtendedAreaInfo[] = [];
   selfSelected = false;
   @ViewChild('table') table: MapTableComponent;
 
@@ -31,7 +32,8 @@ export class CharMapsComponent implements OnInit {
     private analyticsService: AnalyticsService,
     private settingsService: SettingsService,
     private mapService: MapService,
-    private accountService: AccountService
+    private accountService: AccountService,
+    private robotService: RobotService
   ) {
     this.form = fb.group({
       searchText: ['']
@@ -97,6 +99,23 @@ export class CharMapsComponent implements OnInit {
 
   search() {
     this.table.doSearch(this.form.controls.searchText.value);
+  }
+
+  export(clipboard: boolean) {
+
+    const areas = this.filteredArr !== null && this.filteredArr.length > 0 ? this.filteredArr : this.player.pastAreas;
+
+    let exportData = ['Timestamp', 'Area Name', 'Time Spent (in seconds)'].join('\t') + '\n';
+    areas.forEach((a: ExtendedAreaInfo) => {
+      exportData += [moment(a.timestamp).format('ddd, LT') , a.eventArea.name, a.duration].join('\t') + '\n';
+    });
+
+    if (clipboard) {
+      this.robotService.setTextToClipboard(exportData);
+    } else {
+
+    }
+
   }
 
 }
