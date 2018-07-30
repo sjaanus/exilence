@@ -29,13 +29,15 @@
     <div class="flex-area graph-btns">
         <ng-container *ngIf="selfSelected">
             <button mat-raised-button color="primary" type="button" [matMenuTriggerFor]="menu">
-                {{'GRAPH.REPORT' | translate}}
+                {{'GRAPH.ACTIONS.TITLE' | translate}}
                 <mat-icon>arrow_drop_down</mat-icon>
             </button>
             <mat-menu #menu="matMenu">
-                <button (click)="report(false)" mat-menu-item>{{'ROBOT.CLIPBOARD' | translate}}</button>
-                <button (click)="report(true)" mat-menu-item>{{'ROBOT.GAME' | translate}} <span class="keybind-text">({{reportKeybind != undefined ? reportKeybind.keys : ''}})</span></button>
-            </mat-menu>
+                    <button (click)="report(false)" mat-menu-item>{{'GRAPH.ACTIONS.REPORT.CLIPBOARD' | translate}}</button>
+                    <button (click)="report(true)" mat-menu-item>{{'GRAPH.ACTIONS.REPORT.GAME' | translate}} <span class="keybind-text">({{reportKeybind != undefined ? reportKeybind.keys : ''}})</span></button>
+                
+                    <button (click)="export(true)" mat-menu-item>{{'GRAPH.ACTIONS.EXPORT.CLIPBOARD' | translate}}</button>
+                 </mat-menu>
         </ng-container>
 
         <button mat-raised-button color="primary" *ngIf="selfSelected" (click)="popout()" type="button" class="right-aligned extra-margin margin-left">{{'GRAPH.POPOUT' | translate}}</button>

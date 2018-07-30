@@ -23,12 +23,18 @@
         "SHOW": "Show graph",
         "HIDE": "Hide graph",
         "RESET": "Reset graph",
-        "REPORT": "Send net worth report",
+        "ACTIONS": {
+            "TITLE":  "Actions",
+            "REPORT": {
+                "GAME": "Report to Game",
+                "CLIPBOARD": "Report to Clipboard"
+            },
+            "EXPORT":  {
+                "CLIPBOARD": "Export to Clipboard"
+            }
+        },
+
         "POPOUT": "Pop out"
-    },
-    "ROBOT": {
-        "GAME":  "Game",
-        "CLIPBOARD":  "Clipboard"
     },
     "NOTIFICATION": {
         "UPDATE_AVAILABLE": "There is a new version of ExileParty available. Please exit and restart the application to update."
@@ -61,7 +67,11 @@
     },
     "MAPS": {
         "SEARCH": "Filter areas",
-        "RESET": "Clear areas"
+        "RESET": "Clear areas",
+        "EXPORT": {
+            "TITLE": "Actions",
+            "CLIPBOARD": "Export to clipboard"
+        }
     },
     "CURRENCY": {
         "SEARCH": "Filter currency"

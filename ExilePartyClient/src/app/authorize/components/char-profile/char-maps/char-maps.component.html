@@ -19,12 +19,12 @@
         <div class="flex-area">
             <ng-container *ngIf="selfSelected">
                 <button mat-raised-button color="primary" type="button" class="right-aligned" [matMenuTriggerFor]="menu">
-                    {{'MAPS.REPORT' | translate}}
+                    {{'MAPS.EXPORT.TITLE' | translate}}
                     <mat-icon>arrow_drop_down</mat-icon>
                 </button>
                 <mat-menu #menu="matMenu">
                     <button (click)="export(true)" mat-menu-item>{{'MAPS.EXPORT.CLIPBOARD' | translate}}</button>
-                    <button (click)="export(false)" mat-menu-item>{{'MAPS.EXPORT.EXCEL' | translate}}</button>
+                    <!-- <button (click)="export(false)" mat-menu-item>{{'MAPS.EXPORT.EXCEL' | translate}}</button> -->
                 </mat-menu>
             </ng-container>
             <button mat-raised-button color="primary" *ngIf="selfSelected" (click)="resetAreaHistory()" type="button" class="right-aligned">{{'MAPS.RESET' | translate}}</button>

@@ -2,6 +2,7 @@ import { Component, Inject, Input, OnInit, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { Router } from '@angular/router';
 
+import * as moment from 'moment';
 import { Player } from '../../../../shared/interfaces/player.interface';
 import { AccountService } from '../../../../shared/providers/account.service';
 import { AnalyticsService } from '../../../../shared/providers/analytics.service';
@@ -14,6 +15,7 @@ import { SettingsService } from '../../../../shared/providers/settings.service';
 import { NetworthTableComponent } from '../../networth-table/networth-table.component';
 import { SessionService } from '../../../../shared/providers/session.service';
 import { KeybindService } from '../../../../shared/providers/keybind.service';
+import { NetWorthSnapshot } from '../../../../shared/interfaces/income.interface';
 
 @Component({
   selector: 'app-char-wealth',
@@ -147,4 +149,21 @@ export class CharWealthComponent implements OnInit {
   openLink(link: string) {
     this.electronService.shell.openExternal(link);
   }
+
+
+  export(clipboard: boolean) {
+
+    let exportData = ['Timestamp', 'Net worth'].join('\t') + '\n';
+    this.player.netWorthSnapshots.forEach((a: NetWorthSnapshot) => {
+      exportData += [moment(a.timestamp).format('ddd, LT'), a.value.toFixed(1)].join('\t') + '\n';
+    });
+
+    if (clipboard) {
+      this.robotService.setTextToClipboard(exportData);
+    } else {
+
+    }
+
+  }
+
 }
