@@ -10,6 +10,7 @@ import * as moment from 'moment';
 import { SettingsService } from '../../../../shared/providers/settings.service';
 import { MapService } from '../../../../shared/providers/map.service';
 import { AccountService } from '../../../../shared/providers/account.service';
+import { AlertService } from '../../../../shared/providers/alert.service';
 import { RobotService } from '../../../../shared/providers/robot.service';
 
 @Component({
@@ -33,6 +34,7 @@ export class CharMapsComponent implements OnInit {
     private settingsService: SettingsService,
     private mapService: MapService,
     private accountService: AccountService,
+    private alertService: AlertService,
     private robotService: RobotService
   ) {
     this.form = fb.group({
@@ -64,13 +66,14 @@ export class CharMapsComponent implements OnInit {
   }
 
   resetAreaHistory() {
-
     if (this.player.account === this.partyService.currentPlayer.account) {
       const emptyHistory = this.settingsService.deleteAreas();
       this.player.pastAreas = emptyHistory;
       this.mapService.loadAreasFromSettings();
       this.accountService.player.next(this.player);
       this.partyService.selectedPlayer.next(this.player);
+      this.partyService.updatePlayer(this.player);
+      this.alertService.showAlert({ message: 'Area history was cleared', action: 'OK' });
     }
   }
 

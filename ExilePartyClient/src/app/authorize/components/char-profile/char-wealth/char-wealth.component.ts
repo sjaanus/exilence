@@ -15,6 +15,7 @@ import { SettingsService } from '../../../../shared/providers/settings.service';
 import { NetworthTableComponent } from '../../networth-table/networth-table.component';
 import { SessionService } from '../../../../shared/providers/session.service';
 import { KeybindService } from '../../../../shared/providers/keybind.service';
+import { AlertService } from '../../../../shared/providers/alert.service';
 import { NetWorthSnapshot } from '../../../../shared/interfaces/income.interface';
 
 @Component({
@@ -52,7 +53,8 @@ export class CharWealthComponent implements OnInit {
     public messageValueService: MessageValueService,
     private settingsService: SettingsService,
     private sessionService: SessionService,
-    private keybindService: KeybindService
+    private keybindService: KeybindService,
+    private alertService: AlertService
   ) {
     this.form = fb.group({
       searchText: ['']
@@ -93,6 +95,8 @@ export class CharWealthComponent implements OnInit {
       this.incomeService.loadSnapshotsFromSettings();
       this.accountService.player.next(player);
       this.partyService.selectedPlayer.next(player);
+      this.partyService.updatePlayer(player);
+      this.alertService.showAlert({ message: 'Net worth history was cleared', action: 'OK' });
     }
   }
 
