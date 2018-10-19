@@ -40,7 +40,7 @@ ipcMain.on('keybinds-unregister', function (event) {
   globalShortcut.unregisterAll();
 });
 
-ipcMain.on('popout-window-update', (event, window: ExileWindowEvent ) => {
+ipcMain.on('popout-window-update', (event, window: ExileWindowEvent) => {
   if (windows[window.event] && !windows[window.event].isDestroyed()) {
     windows[window.event].webContents.send('popout-window-update', window);
   }
@@ -53,32 +53,39 @@ ipcMain.on('popout-window', (event, data: ExileWindowEvent) => {
   if (windows[window] !== undefined && windows[window] !== null) {
     windows[window].destroy();
   }
-    windows[window] = new BrowserWindow({
-      x: 100,
-      y: 100,
-      height: 85,
-      width: 200,
-      show: false,
-      frame: false,
-      resizable: false,
-      alwaysOnTop: true,
-      icon: path.join(__dirname, 'dist/assets/img/app-icon.png'),
-    });
+  windows[window] = new BrowserWindow({
+    x: 100,
+    y: 100,
+    height: 85,
+    width: 200,
+    show: false,
+    frame: false,
+    resizable: false,
+    alwaysOnTop: true,
+    icon: path.join(__dirname, 'dist/assets/img/app-icon.png'),
+  });
 
-    windows[window].loadURL(url.format({
-      pathname: path.join(__dirname, 'popout/networth.html'),
-      protocol: 'file:',
-      slashes: true
-    }));
+  windows[window].loadURL(url.format({
+    pathname: path.join(__dirname, 'popout/networth.html'),
+    protocol: 'file:',
+    slashes: true
+  }));
 
-    windows[window].once('ready-to-show', () => {
-      windows[window].show();
-    });
+  windows[window].once('ready-to-show', () => {
+    windows[window].show();
+  });
 
-    windows[window].on('closed', (e) => {
-      windows[window] = null;
-    });
+  windows[window].on('closed', (e) => {
+    windows[window] = null;
+  });
 
+});
+
+
+
+ipcMain.on('relaunch', (event, window: ExileWindowEvent) => {
+  app.quit();
+  app.relaunch();
 });
 
 autoUpdater.logger = log;
@@ -125,16 +132,16 @@ function createWindow(windowType: ExileWindowEnum = ExileWindowEnum.Main) {
     // Dereference the window object, usually you would store window
     // in an array if your app supports multi windows, this is the time
     // when you should delete the corresponding element.
-    if (windows[ExileWindowEnum.Networth] !== undefined) {
+    if (windows[ExileWindowEnum.Networth] !== undefined && windows[ExileWindowEnum.Networth] !== null) {
       windows[ExileWindowEnum.Networth].destroy();
     }
-    if (windows[ExileWindowEnum.Ladder] !== undefined) {
+    if (windows[ExileWindowEnum.Ladder] !== undefined && windows[ExileWindowEnum.Ladder] !== null) {
       windows[ExileWindowEnum.Ladder].destroy();
     }
-    if (windows[ExileWindowEnum.Trade] !== undefined) {
+    if (windows[ExileWindowEnum.Trade] !== undefined && windows[ExileWindowEnum.Trade] !== null) {
       windows[ExileWindowEnum.Trade].destroy();
     }
-    if (windows[ExileWindowEnum.Areas] !== undefined) {
+    if (windows[ExileWindowEnum.Areas] !== undefined && windows[ExileWindowEnum.Areas] !== null) {
       windows[ExileWindowEnum.Areas].destroy();
     }
 

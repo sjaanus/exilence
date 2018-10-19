@@ -46,6 +46,9 @@ export class PartyService {
   public playerLeagues: BehaviorSubject<LeagueWithPlayers[]> = new BehaviorSubject<LeagueWithPlayers[]>([]);
   public genericPlayers: BehaviorSubject<Player[]> = new BehaviorSubject<Player[]>([]);
 
+  private reconnectAttempts: number;
+  private forceClosed: boolean;
+
   constructor(
     private router: Router,
     private accountService: AccountService,
@@ -56,6 +59,9 @@ export class PartyService {
     private electronService: ElectronService,
     private messageValueService: MessageValueService
   ) {
+
+    this.reconnectAttempts = 0;
+    this.forceClosed = false;
 
     this.recentParties.next(this.settingService.get('recentParties') || []);
 
@@ -80,10 +86,8 @@ export class PartyService {
     this.initHubConnection();
 
     this._hubConnection.onclose(() => {
-      this.logService.log('[ERROR] Signalr connection closed');
-      this.accountService.clearCharacterList();
-      localStorage.removeItem('sessionId');
-      this.router.navigate(['/disconnected']);
+      this.logService.log('Signalr connection closed', null, true);
+      this.reconnect();
     });
 
     this._hubConnection.on('EnteredParty', (partyData: string, playerData: string) => {
@@ -167,6 +171,10 @@ export class PartyService {
       });
     });
 
+    this._hubConnection.on('ForceDisconnect', () => {
+      this.disconnect('Recived force disconnect command from server.');
+    });
+
     this.logMonitorService.areaJoin.subscribe((msg: LogMessage) => {
       this.logService.log('Player joined area: ', msg.player.name);
       this.handleAreaEvent(msg);
@@ -193,11 +201,34 @@ export class PartyService {
 
   initHubConnection() {
     this.logService.log('Starting signalr connection');
-    this._hubConnection.start().catch((err) => {
+    this._hubConnection.start().then(() => {
+      console.log('Successfully established signalr connection!');
+      this.reconnectAttempts = 0;
+    }).catch((err) => {
       console.error(err.toString());
       this.logService.log('Could not connect to signalr');
-      this.router.navigate(['/disconnected']);
+      this.reconnect();
     });
+  }
+
+  reconnect() {
+    if (this.reconnectAttempts > 5 && !this.forceClosed) {
+      this.disconnect('Could not connect after 5 attempts.');
+    } else {
+      this.logService.log('Trying to reconnect to signalr in 5 seconds.', null, true);
+      setTimeout(() => {
+        this.initHubConnection();
+      }, (5000));
+    }
+    this.reconnectAttempts++;
+  }
+
+  disconnect(reason: string) {
+    this.forceClosed = true;
+    this.logService.log(reason, null, true);
+    this.accountService.clearCharacterList();
+    localStorage.removeItem('sessionId');
+    this.router.navigate(['/disconnected']);
   }
 
   updatePlayerLists(party: Party) {
@@ -207,7 +238,7 @@ export class PartyService {
     party.players.forEach(player => {
       const league = leagues.find(l => l.id === player.character.league);
       if (league === undefined) {
-        leagues.push({id: player.character.league, players: [player]} as LeagueWithPlayers);
+        leagues.push({ id: player.character.league, players: [player] } as LeagueWithPlayers);
       } else {
         const indexOfLeague = leagues.indexOf(league);
         leagues[indexOfLeague].players.push(player);
@@ -222,7 +253,9 @@ export class PartyService {
       .subscribe((equipment: EquipmentResponse) => {
         player = this.externalService.setCharacter(equipment, player);
         if (this._hubConnection) {
-          this.compress(player, (data) => this._hubConnection.invoke('UpdatePlayer', this.party.name, data));
+          this.compress(player, (data) => this._hubConnection.invoke('UpdatePlayer', this.party.name, data).catch((e) => {
+            console.log('LOOK AT THIS ONE!');
+          }));
         }
       });
   }

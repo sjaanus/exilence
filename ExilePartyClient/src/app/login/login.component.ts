@@ -93,7 +93,7 @@ export class LoginComponent implements OnInit {
 
     checkPath() {
         this.pathValid = this.electronService.fs.existsSync(this.pathFormGroup.controls.filePath.value)
-            && this.pathFormGroup.controls.filePath.value.endsWith('Client.txt');
+            && this.pathFormGroup.controls.filePath.value.toLowerCase().endsWith('client.txt');
     }
 
     openLink(link: string) {
@@ -198,12 +198,16 @@ export class LoginComponent implements OnInit {
 
                 const player = this.externalService.setCharacter(data, this.player);
                 this.player = player;
-                this.ladderService.getLadderInfoForCharacter(this.player.character.league, this.player.character.name).subscribe(res => {
-                    if (res !== null && res.list !== null) {
-                        this.player.ladderInfo = res.list;
-                    }
-                    this.completeLogin();
-                });
+                this.ladderService.getLadderInfoForCharacter(this.player.character.league, this.player.character.name).subscribe(
+                    res => {
+                        if (res !== null && res.list !== null) {
+                            this.player.ladderInfo = res.list;
+                        }
+                        this.completeLogin();
+                    },
+                    err => this.completeLogin(),
+                    () => this.completeLogin()
+                );
             });
     }
 
@@ -238,7 +242,6 @@ export class LoginComponent implements OnInit {
             this.accountService.accountInfo.next(this.form);
             this.settingsService.set('account', this.form);
             this.sessionService.initSession(this.form.sessionId);
-            this.incomeService.Snapshot();
             this.isLoading = false;
             this.router.navigate(['/authorized/dashboard']);
         });
