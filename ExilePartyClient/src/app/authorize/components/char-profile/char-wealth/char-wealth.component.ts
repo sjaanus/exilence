@@ -1,22 +1,24 @@
 import { Component, Inject, Input, OnInit, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
+import { MatDialog } from '@angular/material';
 import { Router } from '@angular/router';
-
 import * as moment from 'moment';
+
+import { NetWorthSnapshot } from '../../../../shared/interfaces/income.interface';
 import { Player } from '../../../../shared/interfaces/player.interface';
 import { AccountService } from '../../../../shared/providers/account.service';
+import { AlertService } from '../../../../shared/providers/alert.service';
 import { AnalyticsService } from '../../../../shared/providers/analytics.service';
 import { ElectronService } from '../../../../shared/providers/electron.service';
 import { IncomeService } from '../../../../shared/providers/income.service';
+import { KeybindService } from '../../../../shared/providers/keybind.service';
 import { MessageValueService } from '../../../../shared/providers/message-value.service';
 import { PartyService } from '../../../../shared/providers/party.service';
 import { RobotService } from '../../../../shared/providers/robot.service';
-import { SettingsService } from '../../../../shared/providers/settings.service';
-import { NetworthTableComponent } from '../../networth-table/networth-table.component';
 import { SessionService } from '../../../../shared/providers/session.service';
-import { KeybindService } from '../../../../shared/providers/keybind.service';
-import { AlertService } from '../../../../shared/providers/alert.service';
-import { NetWorthSnapshot } from '../../../../shared/interfaces/income.interface';
+import { SettingsService } from '../../../../shared/providers/settings.service';
+import { InfoDialogComponent } from '../../info-dialog/info-dialog.component';
+import { NetworthTableComponent } from '../../networth-table/networth-table.component';
 
 @Component({
   selector: 'app-char-wealth',
@@ -54,7 +56,8 @@ export class CharWealthComponent implements OnInit {
     private settingsService: SettingsService,
     private sessionService: SessionService,
     private keybindService: KeybindService,
-    private alertService: AlertService
+    private alertService: AlertService,
+    private dialog: MatDialog
   ) {
     this.form = fb.group({
       searchText: ['']
@@ -98,6 +101,27 @@ export class CharWealthComponent implements OnInit {
       this.partyService.updatePlayer(player);
       this.alertService.showAlert({ message: 'Net worth history was cleared', action: 'OK' });
     }
+  }
+
+  openCurrencyDialog(): void {
+    setTimeout(() => {
+      if (!this.settingsService.get('diaShown_wealth') && !this.settingsService.get('hideTooltips')) {
+        const dialogRef = this.dialog.open(InfoDialogComponent, {
+          width: '650px',
+          data: {
+            icon: 'attach_money',
+            title: 'Currency tab',
+            // tslint:disable-next-line:max-line-length
+            content: 'This tab updates when the selected player changes area in game, at most once every 5 minutes.<br/><br/>' +
+              'We store all your net worth data one week back in time. This will be extended in the future.<br/><br/>' +
+              'If this data is incorrect for some reason, you can clear the history by pressing the "reset graph"-button.'
+          }
+        });
+        dialogRef.afterClosed().subscribe(result => {
+          this.settingsService.set('diaShown_wealth', true);
+        });
+      }
+    });
   }
 
   popout() {

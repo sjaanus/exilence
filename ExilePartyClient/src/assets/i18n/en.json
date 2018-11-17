@@ -15,6 +15,9 @@
             "WINDOW": "Window",
             "KEYBINDS": "Keybinds"
         },
+        "FAQ": {
+            "TITLE": "FAQ"
+        },
         "RECENT_PLAYERS": {
             "TITLE": "Inspect players"
         }
@@ -55,6 +58,9 @@
         "LEAGUE_INFO": "Choose your league",
         "NAME": "League"
     },
+    "TRADELEAGUE": {
+        "NAME": "Trade league"
+    },
     "CHARACTER": {
         "NAME": "Character name",
         "NAME_INFO": "Select your current character"
@@ -89,5 +95,8 @@
     "KEYBINDS": {
         "RESET": "Reset keybinds",
         "SAVE": "Save keybinds"
+    },
+    "SETTINGS": {
+        "RESET_DIALOGS": "Reset tutorial-dialogs"
     }
 }

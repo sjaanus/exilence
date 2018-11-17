@@ -1,17 +1,19 @@
 import { Component, Inject, Input, OnInit, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
+import { MatDialog } from '@angular/material';
+import * as moment from 'moment';
 
 import { ExtendedAreaInfo } from '../../../../shared/interfaces/area.interface';
 import { Player } from '../../../../shared/interfaces/player.interface';
-import { AnalyticsService } from '../../../../shared/providers/analytics.service';
-import { PartyService } from '../../../../shared/providers/party.service';
-import { MapTableComponent } from '../../map-table/map-table.component';
-import * as moment from 'moment';
-import { SettingsService } from '../../../../shared/providers/settings.service';
-import { MapService } from '../../../../shared/providers/map.service';
 import { AccountService } from '../../../../shared/providers/account.service';
 import { AlertService } from '../../../../shared/providers/alert.service';
+import { AnalyticsService } from '../../../../shared/providers/analytics.service';
+import { MapService } from '../../../../shared/providers/map.service';
+import { PartyService } from '../../../../shared/providers/party.service';
 import { RobotService } from '../../../../shared/providers/robot.service';
+import { SettingsService } from '../../../../shared/providers/settings.service';
+import { InfoDialogComponent } from '../../info-dialog/info-dialog.component';
+import { MapTableComponent } from '../../map-table/map-table.component';
 
 @Component({
   selector: 'app-char-maps',
@@ -35,6 +37,7 @@ export class CharMapsComponent implements OnInit {
     private mapService: MapService,
     private accountService: AccountService,
     private alertService: AlertService,
+    private dialog: MatDialog,
     private robotService: RobotService
   ) {
     this.form = fb.group({
@@ -53,6 +56,26 @@ export class CharMapsComponent implements OnInit {
 
   ngOnInit() {
     this.analyticsService.sendScreenview('/authorized/party/player/maps');
+  }
+
+  openMapDialog(): void {
+    setTimeout(() => {
+      if (!this.settingsService.get('diaShown_maps') && !this.settingsService.get('hideTooltips')) {
+        const dialogRef = this.dialog.open(InfoDialogComponent, {
+          width: '650px',
+          data: {
+            icon: 'map',
+            title: 'Map tab',
+            // tslint:disable-next-line:max-line-length
+            content: 'This tab updates every time the selected player changes area in game.<br/><br/>' +
+              'We store all the area/map-data one week back in time for each player.'
+          }
+        });
+        dialogRef.afterClosed().subscribe(result => {
+          this.settingsService.set('diaShown_maps', true);
+        });
+      }
+    });
   }
 
   updateSummary(filteredArr) {
@@ -110,7 +133,7 @@ export class CharMapsComponent implements OnInit {
 
     let exportData = ['Timestamp', 'Area Name', 'Time Spent (in seconds)'].join('\t') + '\n';
     areas.forEach((a: ExtendedAreaInfo) => {
-      exportData += [moment(a.timestamp).format('ddd, LT') , a.eventArea.name, a.duration].join('\t') + '\n';
+      exportData += [moment(a.timestamp).format('ddd, LT'), a.eventArea.name, a.duration].join('\t') + '\n';
     });
 
     if (clipboard) {

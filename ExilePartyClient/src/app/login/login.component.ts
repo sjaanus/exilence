@@ -1,7 +1,9 @@
 import { Component, Inject, OnInit, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { MatStep, MatStepper } from '@angular/material';
+import { MatStep, MatStepper, MatDialog } from '@angular/material';
 import { Router } from '@angular/router';
+import { delay, catchError } from 'rxjs/operators';
+import { forkJoin, of, throwError } from 'rxjs';
 
 import { AccountInfo } from '../shared/interfaces/account-info.interface';
 import { ExtendedAreaInfo } from '../shared/interfaces/area.interface';
@@ -18,6 +20,7 @@ import { IncomeService } from '../shared/providers/income.service';
 import { LadderService } from '../shared/providers/ladder.service';
 import { SessionService } from '../shared/providers/session.service';
 import { SettingsService } from '../shared/providers/settings.service';
+import { LeagueChangedDialogComponent } from '../shared/components/league-changed-dialog/league-changed-dialog.component';
 
 @Component({
     selector: 'app-login',
@@ -33,11 +36,15 @@ export class LoginComponent implements OnInit {
     pathValid = false;
     isLoading = false;
     isFetching = false;
+    isFetchingLeagues = false;
+    fetchedLeagues = false;
     fetched = false;
     characterList: Character[] = [];
     leagues: League[];
+    tradeLeagues: League[];
     player = {} as Player;
     leagueName: string;
+    tradeLeagueName: string;
     characterName: string;
     accountName: string;
     sessionId: string;
@@ -62,22 +69,21 @@ export class LoginComponent implements OnInit {
         private settingsService: SettingsService,
         private analyticsService: AnalyticsService,
         private ladderService: LadderService,
-        private incomeService: IncomeService
+        private incomeService: IncomeService,
+        private dialog: MatDialog
     ) {
         this.externalService.leagues.subscribe((res: League[]) => {
             this.leagues = res;
         });
 
-        this.externalService.getLeagues().subscribe(res => {
-            this.externalService.leagues.next(res);
-        });
         this.fetchSettings();
 
         this.accFormGroup = fb.group({
             accountName: [this.accountName !== undefined ? this.accountName : '', Validators.required]
         });
         this.leagueFormGroup = fb.group({
-            leagueName: [this.leagueName !== undefined ? this.leagueName : '', Validators.required]
+            leagueName: [this.leagueName !== undefined ? this.leagueName : '', Validators.required],
+            tradeLeagueName: [this.tradeLeagueName !== undefined ? this.tradeLeagueName : '', Validators.required]
         });
         this.sessFormGroup = fb.group({
             sessionId: [this.sessionId !== undefined ? this.sessionId : '']
@@ -105,6 +111,7 @@ export class LoginComponent implements OnInit {
         this.sessionId = this.settingsService.get('account.sessionId');
         this.accountName = this.settingsService.get('account.accountName');
         this.leagueName = this.settingsService.get('account.leagueName');
+        this.tradeLeagueName = this.settingsService.get('account.tradeLeagueName');
         this.sessionIdValid = this.settingsService.get('account.sessionIdValid');
         this.filePath = this.settingsService.get('account.filePath');
         this.netWorthHistory = this.settingsService.get('networth');
@@ -130,6 +137,7 @@ export class LoginComponent implements OnInit {
     }
 
     ngOnInit() {
+        this.accountService.loggingIn = true;
         this.accountService.characterList.subscribe(res => {
             if (res !== undefined) {
                 this.characterList = res;
@@ -139,9 +147,66 @@ export class LoginComponent implements OnInit {
         this.sessFormGroup.valueChanges.subscribe(val => {
             this.needsValidation = true;
         });
+
+        // bypass to complete if settings are prefilled
+        if (this.characterName !== undefined &&
+            this.sessionId !== undefined &&
+            this.accountName !== undefined &&
+            this.leagueName !== undefined &&
+            this.tradeLeagueName !== undefined &&
+            this.sessionIdValid !== undefined &&
+            this.filePath !== undefined &&
+            this.netWorthHistory !== undefined &&
+            this.areaHistory !== undefined) {
+
+            this.stepper.selectedIndex = 5;
+            this.getLeagues(undefined, false);
+            this.getCharacterList(undefined, false);
+        }
     }
 
-    getCharacterList(accountName?: string) {
+    getLeagues(accountName?: string, skipStep?: boolean) {
+        this.isFetchingLeagues = true;
+
+        const request = forkJoin(
+            this.externalService.getCharacterList(accountName !== undefined ? accountName :
+                this.accFormGroup.controls.accountName.value),
+            this.externalService.getLeagues('main', 1)
+        );
+
+        request.subscribe(res => {
+            // filter out SSF-leagues when listing trade-leagues
+            this.tradeLeagues = res[1].filter(x => x.id.indexOf('SSF') === -1);
+
+            // map character-leagues to new array
+            const distinctLeagues = [];
+            res[0].forEach(char => {
+                if (distinctLeagues.find(l => l.id === char.league) === undefined) {
+                    distinctLeagues.push({ id: char.league } as League);
+                }
+            });
+
+            this.externalService.leagues.next(distinctLeagues);
+            this.fetchedLeagues = true;
+            if (skipStep) {
+                setTimeout(() => {
+                    this.stepper.selectedIndex = 1;
+                }, 250);
+            }
+            setTimeout(() => {
+                this.isFetchingLeagues = false;
+            }, 500);
+        });
+    }
+
+    mapTradeLeague(event) {
+        // if the league is a tradeleague, auto-select tradeleague
+        if (this.tradeLeagues.find(x => x.id === event.value)) {
+            this.leagueFormGroup.controls.tradeLeagueName.setValue(event.value);
+        }
+    }
+
+    getCharacterList(accountName?: string, skipStep?: boolean) {
         this.isFetching = true;
         this.externalService.getCharacterList(accountName !== undefined ? accountName : this.accFormGroup.controls.accountName.value)
             .subscribe((res: Character[]) => {
@@ -152,9 +217,11 @@ export class LoginComponent implements OnInit {
                 if (this.characterList.find(x => x.name === this.characterName) === undefined) {
                     this.charFormGroup.controls.characterName.setValue('');
                 }
-                setTimeout(() => {
-                    this.stepper.selectedIndex = 2;
-                }, 250);
+                if (skipStep) {
+                    setTimeout(() => {
+                        this.stepper.selectedIndex = 2;
+                    }, 250);
+                }
                 setTimeout(() => {
                     this.isFetching = false;
                 }, 500);
@@ -171,6 +238,7 @@ export class LoginComponent implements OnInit {
             accountName: this.accFormGroup.controls.accountName.value,
             characterName: this.charFormGroup.controls.characterName.value,
             leagueName: this.leagueFormGroup.controls.leagueName.value,
+            tradeLeagueName: this.leagueFormGroup.controls.tradeLeagueName.value,
             sessionId: this.sessFormGroup.controls.sessionId.value,
             filePath: this.pathFormGroup.controls.filePath.value,
             sessionIdValid: this.sessionIdValid
@@ -189,6 +257,33 @@ export class LoginComponent implements OnInit {
         }, 500);
     }
 
+    checkLeagueChange(event) {
+        if (event.selectedIndex === 3 &&
+            (this.settingsService.get('lastLeague') !== undefined
+                && (this.settingsService.get('lastLeague') !== this.leagueFormGroup.controls.leagueName.value)
+                ||
+                (this.settingsService.get('account.tradeLeagueName') !== undefined
+                    && this.settingsService.get('account.tradeLeagueName') !== this.leagueFormGroup.controls.tradeLeagueName.value))) {
+            // league changed since last log-in
+            const dialogRef = this.dialog.open(LeagueChangedDialogComponent, {
+                width: '650px',
+                data: {
+                    icon: 'swap_horiz',
+                    title: 'League changed',
+                    // tslint:disable-next-line:max-line-length
+                    content: 'We detected that you changed league-settings since your last login. Please note that your networth and area history will be mixed between leagues if you continue without clearing the history.<br/><br/>' +
+                        'Do you want to clear the history?'
+                }
+            });
+            dialogRef.afterClosed().subscribe(result => {
+                if (result !== undefined) {
+                    this.netWorthHistory = result.networthHistory;
+                    this.areaHistory = result.areaHistory;
+                }
+            });
+        }
+    }
+
     login() {
         this.isLoading = true;
         this.form = this.getFormObj();
@@ -205,8 +300,7 @@ export class LoginComponent implements OnInit {
                         }
                         this.completeLogin();
                     },
-                    err => this.completeLogin(),
-                    () => this.completeLogin()
+                    err => this.completeLogin()
                 );
             });
     }
@@ -240,9 +334,20 @@ export class LoginComponent implements OnInit {
             this.player.sessionIdProvided = this.sessionIdValid;
             this.accountService.player.next(this.player);
             this.accountService.accountInfo.next(this.form);
+
+            // if trade-league has changed since last login, we should update ninjaprices
+            if (this.settingsService.get('account.tradeLeagueName') !== this.leagueFormGroup.controls.tradeLeagueName.value) {
+                this.externalService.tradeLeagueChanged = true;
+            } else {
+                this.externalService.tradeLeagueChanged = false;
+            }
+
+            this.accountService.loggingIn = false;
+
             this.settingsService.set('account', this.form);
             this.sessionService.initSession(this.form.sessionId);
             this.isLoading = false;
+            this.settingsService.set('lastLeague', this.leagueFormGroup.controls.leagueName.value);
             this.router.navigate(['/authorized/dashboard']);
         });
     }

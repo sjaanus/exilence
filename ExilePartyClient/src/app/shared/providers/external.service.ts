@@ -17,12 +17,14 @@ import { Stash } from '../interfaces/stash.interface';
 import { AnalyticsService } from './analytics.service';
 import { ElectronService } from './electron.service';
 import { LogService } from './log.service';
+import { Character } from '../interfaces/character.interface';
 
 @Injectable()
 export class ExternalService {
   public url: 'https://www.pathofexile.com/character-window/get-items';
 
   public leagues: BehaviorSubject<League[]> = new BehaviorSubject<League[]>([]);
+  public tradeLeagueChanged = false;
 
   constructor(
     private http: HttpClient,
@@ -50,24 +52,24 @@ export class ExternalService {
     });
   }
 
-  getLeagues(): Observable<any> {
-    const leagueType = 'main';
-    const parameters = `?type=${leagueType}`;
-    return this.http.get('http://api.pathofexile.com/leagues' + parameters).catch(e => {
-      if (e.status !== 403 && e.status !== 404) {
-        this.logService.log('Could not fetch leagues, disconnecting!', null, true);
-        this.router.navigate(['/disconnected']);
-      }
-      return Observable.of(null);
-    });
-  }
-
   getCharacterList(account: string) {
     const parameters = `?accountName=${account}`;
     return this.http.get('https://www.pathofexile.com/character-window/get-characters' + parameters)
       .catch(e => {
         if (e.status !== 403 && e.status !== 404) {
           this.logService.log('Could not fetch character list, disconnecting!', null, true);
+          this.router.navigate(['/disconnected']);
+        }
+        return Observable.of(null);
+      });
+  }
+
+  getLeagues(type: string, compact: number) {
+    const parameters = `?type=${type}&compact=${compact}`;
+    return this.http.get('http://api.pathofexile.com/leagues' + parameters)
+      .catch(e => {
+        if (e.status !== 403 && e.status !== 404) {
+          this.logService.log('Could not fetch leagues, disconnecting!', null, true);
           this.router.navigate(['/disconnected']);
         }
         return Observable.of(null);

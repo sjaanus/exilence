@@ -7,6 +7,7 @@ import 'rxjs/add/operator/do';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs/Observable';
 
+import { HistoryHelper } from '../helpers/history.helper';
 import { NetWorthHistory, NetWorthItem, NetWorthSnapshot } from '../interfaces/income.interface';
 import { Item } from '../interfaces/item.interface';
 import { Player } from '../interfaces/player.interface';
@@ -18,7 +19,7 @@ import { LogService } from './log.service';
 import { NinjaService } from './ninja.service';
 import { PartyService } from './party.service';
 import { SettingsService } from './settings.service';
-import { HistoryHelper } from '../helpers/history.helper';
+import { SessionService } from './session.service';
 
 
 
@@ -38,6 +39,7 @@ export class IncomeService {
   private totalNetWorthItems: NetWorthItem[] = [];
   public totalNetWorth = 0;
   private fiveMinutes = 5 * 60 * 1000;
+  private sessionIdValid = false;
 
   constructor(
     private ninjaService: NinjaService,
@@ -45,7 +47,7 @@ export class IncomeService {
     private partyService: PartyService,
     private externalService: ExternalService,
     private settingsService: SettingsService,
-    private logService: LogService,
+    private logService: LogService
   ) {
   }
 
@@ -71,11 +73,15 @@ export class IncomeService {
     const oneHourAgo = (Date.now() - (1 * 60 * 60 * 1000));
     const oneWeekAgo = (Date.now() - (1 * 60 * 60 * 24 * 7 * 1000));
     this.netWorthHistory = this.settingsService.get('networth');
+    const selectedStashtabs = this.settingsService.get('selectedStashTabs');
+
+    this.sessionIdValid = this.settingsService.get('account.sessionIdValid');
     if (
       this.netWorthHistory.lastSnapshot < (Date.now() - this.fiveMinutes) &&
       this.localPlayer !== undefined &&
-      this.sessionId !== undefined &&
-      !this.isSnapshotting
+      (this.sessionId !== undefined && this.sessionId !== '' && this.sessionIdValid) &&
+      !this.isSnapshotting && !this.accountService.loggingIn && !this.settingsService.isChangingStash &&
+      (selectedStashtabs === undefined || selectedStashtabs.length > 0)
     ) {
       this.isSnapshotting = true;
       this.netWorthHistory.lastSnapshot = Date.now();
@@ -122,21 +128,7 @@ export class IncomeService {
     const accountName = this.localPlayer.account;
     const league = this.localPlayer.character.league;
 
-    let priceInfoLeague = league;
-
-    // fetch prices for trading counter-part if character is in SSF (dynamic leagues will be added later)
-    if (priceInfoLeague === 'SSF Incursion HC') {
-      priceInfoLeague = 'Hardcore Incursion';
-    }
-    if (priceInfoLeague === 'SSF Hardcore') {
-      priceInfoLeague = 'Hardcore';
-    }
-    if (priceInfoLeague === 'SSF Incursion') {
-      priceInfoLeague = 'Incursion';
-    }
-    if (priceInfoLeague === 'SSF Standard') {
-      priceInfoLeague = 'Standard';
-    }
+    const priceInfoLeague = this.settingsService.get('account.tradeLeagueName');
 
     this.playerStashTabs = [];
     this.totalNetWorthItems = [];
@@ -216,14 +208,10 @@ export class IncomeService {
     });
   }
 
-  getPriceForItem(name: string) {
-    return this.ninjaPrices[name];
-  }
-
   getValuesFromNinja(league: string) {
     const oneHourAgo = (Date.now() - (1 * 60 * 60 * 1000));
     const length = Object.values(this.ninjaPrices).length;
-    if (length > 0 && this.lastNinjaHit > oneHourAgo) {
+    if (length > 0 && (this.lastNinjaHit > oneHourAgo && !this.externalService.tradeLeagueChanged)) {
       return Observable.of(null);
     } else {
       this.logService.log('[INFO] Retriving prices from poe.ninja');
@@ -255,11 +243,6 @@ export class IncomeService {
               name = line.currencyTypeName;
             }
             if ('name' in line) {
-
-              if (line.name.indexOf('Remnant') > -1) {
-                const debug = -1;
-              }
-
               name = line.name;
               if (line.baseType && (line.name.indexOf(line.baseType) === -1)) {
                 name += ' ' + line.baseType;
@@ -285,6 +268,7 @@ export class IncomeService {
 
     if (selectedStashTabs === undefined) {
       selectedStashTabs = [];
+
       for (let i = 0; i < 5; i++) {
         selectedStashTabs.push({ name: '', position: i });
       }

@@ -1,9 +1,36 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
-## [0.5.6] - 2018-XX-XX
+## [0.6.2] - 2018-11-XX
+- Messages are now posted to your current party instead of local chat
+- Minor style-tweaks/fixes
+
+## [0.6.1] - 2018-11-17
+- Increased the time you can be inactive before getting kicked from the server (now 1 hour instead of 15 min)
+- Added support to choose which league prices should be fetched from (for SSF/private-leagues that doesn't have pricing)
+- Added a popup for clearing history if you change to another league when logging in
+- Added a limit to how often messages can be sent to the game (every 1½ second)
+- Replaced poe-racing.com-implementation with our own ladder-endpoint
+- Added ladder-parsing for private-leagues
+- Now autocompletes to the last step of the login-process if you have all settings stored
+- Now auto-selects trade-league for you if the league selected is a trade-league to avoid mistakes
+- Reworked keybind-events to be more reliable (using a new framework)
+- Added a global setting to hide tutorial-tooltips (found under general)
+- Improved the behaviour of the currency-calculations
+- Increased width of popout-window 
+
+## [0.6.0] - 2018-11-15
+- Added support for private-leagues
+- Added a tutorial (helper-tooltips) that will be shown the first time you launch Exile Party
+- Added a FAQ-page, listing frequently asked questions with answers
+- Added language-support (now displays timestamps within the app in your system language)
+- Added a general tab to the settings-page
+- Added a button to reset helper-tooltips
+- Improved reconnect-functionality to avoid infinite loop when party has expired
 - Fixed a bug where item-names werent displayed properly after an update from GGG
+- Changed hosting-provider for servers
 - Removed case-sensitivity in the path for the client.txt-file
+- Minor bugfixes and code-cleanup
 
 ## [0.5.5] - 2018-09-07
 - Added reconnect functionality, now tries to reconnect five times before disconnecting.

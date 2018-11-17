@@ -1,22 +1,25 @@
 import { NgModule } from '@angular/core';
-import { CharMapsComponent } from './char-maps.component';
-import { SharedModule } from '../../../../shared/shared.module';
-import { MapTableModule } from '../../map-table/map-table.module';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { MatInputModule, MatButtonModule, MatMenuModule, MatIconModule } from '@angular/material';
+import { MatButtonModule, MatInputModule } from '@angular/material';
+
+import { SharedModule } from '../../../../shared/shared.module';
+import { InfoDialogComponent } from '../../info-dialog/info-dialog.component';
+import { InfoDialogModule } from '../../info-dialog/info-dialog.module';
+import { MapTableModule } from '../../map-table/map-table.module';
+import { CharMapsComponent } from './char-maps.component';
 
 @NgModule({
-  imports: [
-    SharedModule,
-    MapTableModule,
-    FormsModule,
-    ReactiveFormsModule,
-    MatInputModule,
-    MatButtonModule,
-    MatMenuModule,
-    MatIconModule
-  ],
-  declarations: [CharMapsComponent],
-  exports: [CharMapsComponent]
+    imports: [
+        SharedModule,
+        MapTableModule,
+        FormsModule,
+        ReactiveFormsModule,
+        MatInputModule,
+        MatButtonModule,
+        InfoDialogModule
+    ],
+    declarations: [CharMapsComponent],
+    exports: [CharMapsComponent],
+    entryComponents: [InfoDialogComponent]
 })
 export class CharMapsModule { }
