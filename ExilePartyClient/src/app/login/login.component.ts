@@ -383,7 +383,7 @@ export class LoginComponent implements OnInit {
 
             this.accountService.loggingIn = false;
 
-            this.priceService.Update(this.tradeLeagueName);
+            this.priceService.Update(this.leagueFormGroup.controls.tradeLeagueName.value);
 
             this.settingsService.set('account', this.form);
             this.sessionService.initSession(this.form.sessionId);
