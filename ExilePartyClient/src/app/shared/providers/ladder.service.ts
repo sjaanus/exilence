@@ -51,10 +51,6 @@ export class LadderService {
   }
 
   getLadderInfoForCharacter(league: string, characterName: string): Observable<any> {
-    this.cooldown = true;
-    setTimeout(x => {
-      this.cooldown = false;
-    }, 1000 * 60 * 1);
     // tslint:disable-next-line:max-line-length
     this.logService.log(`Retriving ladder for league: ${league} and character: ${characterName}`);
     const parameters = `?character=${characterName}&league=${league}`;

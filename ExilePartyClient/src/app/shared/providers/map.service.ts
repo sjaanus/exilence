@@ -1,14 +1,13 @@
 import { Injectable } from '@angular/core';
 
+import { HistoryHelper } from '../helpers/history.helper';
 import { AreaEventType, AreaInfo, EventArea, ExtendedAreaInfo } from '../interfaces/area.interface';
 import { Player } from '../interfaces/player.interface';
 import { AccountService } from './account.service';
 import { IncomeService } from './income.service';
 import { LogMonitorService } from './log-monitor.service';
 import { PartyService } from './party.service';
-import { NetWorthSnapshot } from '../interfaces/income.interface';
 import { SettingsService } from './settings.service';
-import { HistoryHelper } from '../helpers/history.helper';
 
 
 @Injectable()
@@ -63,7 +62,7 @@ export class MapService {
       };
       let areasToSend;
       this.areaHistory = this.areaHistory
-          .filter((area: ExtendedAreaInfo) => area.timestamp > oneWeekAgo);
+        .filter((area: ExtendedAreaInfo) => area.timestamp > oneWeekAgo);
 
       // If we enter a map
       // And got atleast three zones in out history (map --> hideout --> map)
@@ -122,7 +121,7 @@ export class MapService {
       const historyToSend = HistoryHelper.filterNetworth(this.localPlayer.netWorthSnapshots, oneHourAgo);
 
       const objToSend = Object.assign({}, this.localPlayer);
-      if(areasToSend !== undefined){
+      if (areasToSend !== undefined) {
         objToSend.pastAreas = areasToSend;
       }
       objToSend.netWorthSnapshots = historyToSend;

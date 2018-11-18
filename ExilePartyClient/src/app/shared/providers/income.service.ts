@@ -18,8 +18,8 @@ import { ExternalService } from './external.service';
 import { LogService } from './log.service';
 import { NinjaService } from './ninja.service';
 import { PartyService } from './party.service';
+import { PriceService } from './price.service';
 import { SettingsService } from './settings.service';
-import { SessionService } from './session.service';
 
 
 
@@ -47,7 +47,8 @@ export class IncomeService {
     private partyService: PartyService,
     private externalService: ExternalService,
     private settingsService: SettingsService,
-    private logService: LogService
+    private logService: LogService,
+    private priceService: PriceService
   ) {
   }
 
@@ -150,11 +151,19 @@ export class IncomeService {
 
           itemName = itemName.replace('<<set:MS>><<set:M>><<set:S>>', '').trim();
 
+
+
           if (typeof this.ninjaPrices[itemName] !== 'undefined' || itemName === 'Chaos Orb') {
 
             let valueForItem = this.ninjaPrices[itemName];
             if (itemName === 'Chaos Orb') {
               valueForItem = 1;
+            }
+
+            const poeWatchPrice = this.priceService.pricecheckItemByName(itemName);
+            console.log(`Poe.ninja price for: ${itemName}`, valueForItem);
+            if (typeof poeWatchPrice !== 'undefined') {
+              console.log(`Poe.watch price for: ${itemName}`, poeWatchPrice.mode);
             }
 
             let stacksize = 1;

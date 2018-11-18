@@ -7,6 +7,7 @@ import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { NgModule } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
+import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
@@ -23,15 +24,15 @@ import { NotFoundModule } from './not-found/not-found.module';
 import { WebviewDirective } from './shared/directives/webview.directive';
 import { CanActivateAuthorized } from './shared/guards/authorized.guard';
 import { AccountService } from './shared/providers/account.service';
+import { AlertService } from './shared/providers/alert.service';
 import { ElectronService } from './shared/providers/electron.service';
 import { ExternalService } from './shared/providers/external.service';
 import { LogService } from './shared/providers/log.service';
 import { NinjaService } from './shared/providers/ninja.service';
+import { PriceService } from './shared/providers/price.service';
 import { RobotService } from './shared/providers/robot.service';
 import { SessionService } from './shared/providers/session.service';
 import { SettingsService } from './shared/providers/settings.service';
-import { MatSnackBarModule } from '@angular/material/snack-bar';
-import { AlertService } from './shared/providers/alert.service';
 
 // AoT requires an exported function for factories
 export function HttpLoaderFactory(http: HttpClient) {
@@ -78,7 +79,8 @@ export function HttpLoaderFactory(http: HttpClient) {
     UpperCasePipe,
     DatePipe,
     NinjaService,
-    AlertService
+    AlertService,
+    PriceService
   ],
   bootstrap: [AppComponent]
 })
