@@ -177,7 +177,10 @@ export class LoginComponent implements OnInit {
             this.netWorthHistory !== undefined &&
             this.areaHistory !== undefined) {
 
-            this.stepper.selectedIndex = 5;
+            for (let i = 0; i < 6; i++) {
+                this.stepper.selectedIndex = i;
+            }
+
             this.getLeagues(undefined, false);
             this.getCharacterList(undefined, false);
         }
