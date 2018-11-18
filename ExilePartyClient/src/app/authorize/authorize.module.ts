@@ -20,6 +20,7 @@ import { SettingsModule } from './settings/settings.module';
 import { LadderService } from '../shared/providers/ladder.service';
 import { MessageValueService } from '../shared/providers/message-value.service';
 import { FaqModule } from './faq/faq.module';
+import { TradingModule } from './trading/trading.module';
 
 @NgModule({
   imports: [
@@ -37,7 +38,8 @@ import { FaqModule } from './faq/faq.module';
     InspectPlayersModule,
     MatSidenavModule,
     SettingsModule,
-    FaqModule
+    FaqModule,
+    TradingModule
   ],
   declarations: [AuthorizeComponent],
   providers: [

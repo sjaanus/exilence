@@ -11,6 +11,7 @@ import { InspectPlayersComponent } from './authorize/inspect-players/inspect-pla
 import { SettingsComponent } from './authorize/settings/settings.component';
 import { DisconnectedComponent } from './disconnected/disconnected.component';
 import { FaqComponent } from './authorize/faq/faq.component';
+import { TradingComponent } from './authorize/trading/trading.component';
 
 const routes: Routes = [
     // login-section
@@ -21,6 +22,7 @@ const routes: Routes = [
     { path: 'authorized', component: AuthorizeComponent,  canActivate: [CanActivateAuthorized], children: [
         { path: 'dashboard', component: DashboardComponent },
         { path: 'party', component: PartyComponent },
+        { path: 'trading', component: TradingComponent },
         { path: 'inspect-players', component: InspectPlayersComponent },
         { path: 'settings', component: SettingsComponent },
         { path: 'faq', component: FaqComponent },

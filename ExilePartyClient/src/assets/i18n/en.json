@@ -9,6 +9,9 @@
         "PARTY": {
             "TITLE": "Current group"
         },
+        "TRADING": {
+            "TITLE": "Trading"
+        },
         "SETTINGS": {
             "TITLE": "Settings",
             "STASHTAB_LIST_HEADER": "Select which stash-tabs to include",
