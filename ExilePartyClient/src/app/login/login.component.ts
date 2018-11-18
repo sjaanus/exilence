@@ -108,8 +108,20 @@ export class LoginComponent implements OnInit {
         this.electronService.shell.openExternal(link);
     }
 
+    resetStepper() {
+        this.stepper.reset();
+        this.stepper.selectedIndex = 1;
+    }
+
     resetPrivateProfileError() {
         this.privateProfileError = false;
+    }
+
+    getRequiredState() {
+        setTimeout(() => {
+            return this.privateProfileError
+                || (!this.sessionIdValid && !this.needsValidation && this.sessFormGroup.controls.sessionId.value !== '');
+        });
     }
 
     fetchSettings() {
@@ -171,8 +183,11 @@ export class LoginComponent implements OnInit {
         }
     }
 
+    setSessionCookie(sessionId: string) {
+        this.externalService.setCookie(sessionId);
+    }
+
     getLeagues(accountName?: string, skipStep?: boolean) {
-        this.privateProfileError = false;
         this.isFetchingLeagues = true;
 
         const sessId = this.sessFormGroup.controls.sessionId.value;
@@ -191,6 +206,8 @@ export class LoginComponent implements OnInit {
                 // profile is private
                 this.privateProfileError = true;
                 this.isFetchingLeagues = false;
+                // reset settings in this case
+                this.settingsService.set('account', undefined);
             } else {
 
                 // map character-leagues to new array
@@ -329,7 +346,7 @@ export class LoginComponent implements OnInit {
         this.externalService.validateSessionId(
             form.sessionId,
             form.accountName,
-            form.leagueName,
+            'Standard',
             0
         ).subscribe(res => {
             this.needsValidation = false;
