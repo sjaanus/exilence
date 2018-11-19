@@ -17,6 +17,7 @@ import { AnalyticsService } from '../shared/providers/analytics.service';
 import { ElectronService } from '../shared/providers/electron.service';
 import { ExternalService } from '../shared/providers/external.service';
 import { LadderService } from '../shared/providers/ladder.service';
+import { NetworthService } from '../shared/providers/networth.service';
 import { PriceService } from '../shared/providers/price.service';
 import { SessionService } from '../shared/providers/session.service';
 import { SettingsService } from '../shared/providers/settings.service';
@@ -70,7 +71,8 @@ export class LoginComponent implements OnInit {
         private analyticsService: AnalyticsService,
         private ladderService: LadderService,
         private priceService: PriceService,
-        private dialog: MatDialog
+        private dialog: MatDialog,
+        private networthService: NetworthService
     ) {
 
 
@@ -364,6 +366,10 @@ export class LoginComponent implements OnInit {
             this.accountService.loggingIn = false;
 
             this.priceService.Update(this.tradeLeagueName);
+            setTimeout(() => {
+                this.networthService.Snapshot();
+            }, 3000);
+
 
             this.settingsService.set('account', this.form);
             this.sessionService.initSession(this.form.sessionId);

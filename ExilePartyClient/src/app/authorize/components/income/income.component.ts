@@ -5,9 +5,8 @@ import * as moment from 'moment';
 
 import { ChartSeries, ChartSeriesEntry } from '../../../shared/interfaces/chart.interface';
 import { Player } from '../../../shared/interfaces/player.interface';
-import { IncomeService } from '../../../shared/providers/income.service';
-import { PartyService } from '../../../shared/providers/party.service';
 import { AccountService } from '../../../shared/providers/account.service';
+import { PartyService } from '../../../shared/providers/party.service';
 
 
 @Component({
@@ -43,7 +42,6 @@ export class IncomeComponent implements OnInit {
   selectedColorScheme: string;
 
   constructor(
-    private incomeService: IncomeService,
     private partyService: PartyService,
     private accountService: AccountService
   ) {

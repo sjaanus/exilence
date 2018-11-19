@@ -29,7 +29,6 @@ import { ElectronService } from './shared/providers/electron.service';
 import { ExternalService } from './shared/providers/external.service';
 import { LogService } from './shared/providers/log.service';
 import { NinjaService } from './shared/providers/ninja.service';
-import { PriceService } from './shared/providers/price.service';
 import { RobotService } from './shared/providers/robot.service';
 import { SessionService } from './shared/providers/session.service';
 import { SettingsService } from './shared/providers/settings.service';
@@ -79,8 +78,7 @@ export function HttpLoaderFactory(http: HttpClient) {
     UpperCasePipe,
     DatePipe,
     NinjaService,
-    AlertService,
-    PriceService
+    AlertService
   ],
   bootstrap: [AppComponent]
 })

@@ -4,10 +4,11 @@ import { HistoryHelper } from '../helpers/history.helper';
 import { AreaEventType, AreaInfo, EventArea, ExtendedAreaInfo } from '../interfaces/area.interface';
 import { Player } from '../interfaces/player.interface';
 import { AccountService } from './account.service';
-import { IncomeService } from './income.service';
 import { LogMonitorService } from './log-monitor.service';
+import { NetworthService } from './networth.service';
 import { PartyService } from './party.service';
 import { SettingsService } from './settings.service';
+
 
 
 @Injectable()
@@ -24,7 +25,7 @@ export class MapService {
     private logMonitorService: LogMonitorService,
     private accountService: AccountService,
     private partyService: PartyService,
-    private incomeService: IncomeService,
+    private networthService: NetworthService,
     private settingsService: SettingsService
   ) {
 
@@ -48,7 +49,8 @@ export class MapService {
 
       // delay snapshot by 25 seconds, to make room for stashing/vendoring
       setTimeout(x => {
-        this.incomeService.Snapshot();
+        // this.incomeService.Snapshot();
+        this.networthService.Snapshot();
       }, 1000 * 25);
 
       clearInterval(this.durationInterval);

@@ -1,22 +1,22 @@
-import { Component, Inject, Input, OnInit, ViewChild, AfterViewInit } from '@angular/core';
+import { Component, Inject, Input, OnInit, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
+import { MatDialog } from '@angular/material';
 import { Router } from '@angular/router';
 
 import { Player } from '../../../../shared/interfaces/player.interface';
 import { AccountService } from '../../../../shared/providers/account.service';
+import { AlertService } from '../../../../shared/providers/alert.service';
 import { AnalyticsService } from '../../../../shared/providers/analytics.service';
 import { ElectronService } from '../../../../shared/providers/electron.service';
-import { IncomeService } from '../../../../shared/providers/income.service';
+import { KeybindService } from '../../../../shared/providers/keybind.service';
 import { MessageValueService } from '../../../../shared/providers/message-value.service';
+import { NetworthService } from '../../../../shared/providers/networth.service';
 import { PartyService } from '../../../../shared/providers/party.service';
 import { RobotService } from '../../../../shared/providers/robot.service';
-import { SettingsService } from '../../../../shared/providers/settings.service';
-import { NetworthTableComponent } from '../../networth-table/networth-table.component';
 import { SessionService } from '../../../../shared/providers/session.service';
-import { KeybindService } from '../../../../shared/providers/keybind.service';
-import { AlertService } from '../../../../shared/providers/alert.service';
+import { SettingsService } from '../../../../shared/providers/settings.service';
 import { InfoDialogComponent } from '../../info-dialog/info-dialog.component';
-import { MatDialog } from '@angular/material';
+import { NetworthTableComponent } from '../../networth-table/networth-table.component';
 
 @Component({
   selector: 'app-char-wealth',
@@ -48,7 +48,7 @@ export class CharWealthComponent implements OnInit {
     private analyticsService: AnalyticsService,
     private settingService: SettingsService,
     private robotService: RobotService,
-    private incomeService: IncomeService,
+    private networthService: NetworthService,
     private accountService: AccountService,
     public messageValueService: MessageValueService,
     private settingsService: SettingsService,
@@ -93,7 +93,7 @@ export class CharWealthComponent implements OnInit {
     if (player.account === this.partyService.currentPlayer.account) {
       const emptyHistory = this.settingService.deleteNetWorth();
       player.netWorthSnapshots = emptyHistory.history;
-      this.incomeService.loadSnapshotsFromSettings();
+      this.networthService.clearHistory();
       this.accountService.player.next(player);
       this.partyService.selectedPlayer.next(player);
       this.partyService.updatePlayer(player);

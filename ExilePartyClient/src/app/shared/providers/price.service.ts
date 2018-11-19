@@ -1,12 +1,13 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
+import { forkJoin, Observable } from 'rxjs';
 
 import { CombinedItemPriceInfo } from '../interfaces/poewatch/combined-item-price-info.interface';
 import { ItemInfo } from '../interfaces/poewatch/item-info.interface';
 import { ItemPrice } from '../interfaces/poewatch/item-price.interface';
 import { AnalyticsService } from './analytics.service';
 import { LogService } from './log.service';
+
 
 @Injectable({
   providedIn: 'root'
@@ -29,12 +30,10 @@ export class PriceService {
 
   Update(league: string) {
     console.log('Update triggered from price.service.ts');
-    Observable.forkJoin([this.fetchPrices(league), this.fetchItems()]).subscribe(res => {
+    forkJoin([this.fetchPrices(league), this.fetchItems()]).subscribe(res => {
       this.itemPrices = res[0];
       this.itemData = res[1];
-      const combined = this.itemData.map(x => Object.assign(x, this.itemPrices.find(y => y.id === x.id)));
-      this.ItemsWithPrice = combined;
-      console.log(this.ItemsWithPrice.length);
+      this.ItemsWithPrice = this.itemData.map(x => Object.assign(x, this.itemPrices.find(y => y.id === x.id)));
     });
   }
 
@@ -69,11 +68,9 @@ export class PriceService {
   }
 
   fetchItems(): Observable<ItemInfo[]> {
-
     if (this.itemData.length !== 0) {
       return Observable.of(this.itemData);
     }
-
     // this.analyticsService.sendEvent('PriceService', `Prices`);
     const url = `${this.poeWatchBaseUrl}/itemdata`;
     return this.http.get<ItemInfo[]>(url);
