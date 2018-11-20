@@ -137,16 +137,15 @@ export class NetworthService {
 
             const itemName = this.retriveItemName(item);
             const itemStacksize = item.stackSize ? item.stackSize : 1;
-            const itemPrice = this.priceService.pricecheckItemByName(itemName);
+            let itemPrice = this.identifyAndPricecheckItem(item);
 
             if (typeof itemPrice !== 'undefined' || itemName === 'Chaos Orb') {
-              let itemMeanPrice = 0;
+
               if (itemName === 'Chaos Orb') {
-                itemMeanPrice = 1;
-              } else {
-                itemMeanPrice = itemPrice.mean;
+                itemPrice = 1;
               }
-              const totalPrice = itemMeanPrice * itemStacksize;
+
+              const totalPrice = itemPrice * itemStacksize;
               if (totalPrice >= 1) { // If the total price is one chaos or more.
 
                 const existingItem = totalNetWorthItems.find(x => x.name === itemName);
@@ -162,15 +161,13 @@ export class NetworthService {
                   const netWorthItem: NetWorthItem = {
                     name: itemName,
                     value: totalPrice,
-                    valuePerUnit: itemMeanPrice,
+                    valuePerUnit: itemPrice,
                     icon: item.icon.indexOf('?') >= 0
                       ? item.icon.substring(0, item.icon.indexOf('?')) + '?scale=1&scaleIndex=3&w=1&h=1'
                       : item.icon + '?scale=1&scaleIndex=3&w=1&h=1',
                     stacksize: itemStacksize
                   };
-
                   totalNetWorthItems.push(netWorthItem);
-
                 }
               }
             }
@@ -198,6 +195,10 @@ export class NetworthService {
 
         this.isSnapshotting = false;
       });
+  }
+
+  identifyAndPricecheckItem(item: Item): number {
+    return this.priceService.pricecheckItemByName(item.name).mean;
   }
 
   calculateTotalNetWorth(netWorthItemArray: NetWorthItem[]): number {
