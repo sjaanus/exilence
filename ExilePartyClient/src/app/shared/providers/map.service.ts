@@ -50,7 +50,7 @@ export class MapService {
       setTimeout(x => {
         // this.incomeService.Snapshot();
         this.networthService.Snapshot();
-      }, 1000 * 25);
+      }, 1000 * 5);
 
       clearInterval(this.durationInterval);
 

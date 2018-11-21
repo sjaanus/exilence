@@ -3,7 +3,7 @@ import 'rxjs/add/operator/delay';
 import 'rxjs/add/operator/toArray';
 
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
+import { from } from 'rxjs';
 
 import { HistoryHelper } from '../helpers/history.helper';
 import { NetWorthHistory, NetWorthItem, NetWorthSnapshot } from '../interfaces/income.interface';
@@ -17,6 +17,7 @@ import { PartyService } from './party.service';
 import { PriceService } from './price.service';
 import { SessionService } from './session.service';
 import { SettingsService } from './settings.service';
+
 
 
 @Injectable({
@@ -118,15 +119,12 @@ export class NetworthService {
       this.selectedStashTabs = this.selectedStashTabs.slice(0, 19);
     }
 
-    Observable
-      .of(this.selectedStashTabs)
-      .concatMap((tab: any) =>
-        this.externalService.getStashTab(
-          this.session.sessionId,
-          this.localPlayer.account,
-          this.localPlayer.character.league,
-          tab.position
-        ).delay(750))
+
+    from(this.selectedStashTabs)
+      .concatMap((tab: any) => {
+        // tslint:disable-next-line:max-line-length
+        return this.externalService.getStashTab(this.session.sessionId, this.localPlayer.account, this.localPlayer.character.league, tab.position).delay(750);
+      })
       .toArray()
       .subscribe((stashes: Stash[]) => {
 
@@ -198,7 +196,50 @@ export class NetworthService {
   }
 
   identifyAndPricecheckItem(item: Item): number {
-    return this.priceService.pricecheckItemByName(item.name).mean;
+
+    let price: any = 0;
+    let elderOrShaper = null;
+    if (item.elder) { elderOrShaper = 'elder'; }
+    if (item.shaper) { elderOrShaper = 'shaper'; }
+
+    let links = 0;
+    if (item.sockets) { links = this.getItemLinks(item.sockets.map(t => t.group)); }
+    if (links < 5) { links = null; }
+
+    switch (item.frameType) {
+      case 0: // Normal
+      case 1: // Magic
+      case 2: // Rare
+        price = this.priceService.pricecheckItem(item.typeLine, item.ilvl, elderOrShaper);
+        return price ? price.mean : 0;
+      case 3: // Unique
+        price = this.priceService.pricecheckUniqueItem(item.name, null);
+        return price ? price.mean : 0;
+      case 4: // Gem
+        const level = item.properties.find(t => t.name === 'Level').values[0][0];
+        const quality =
+          item.properties.find(t => t.name === 'Quality') ?
+            item.properties.find(t => t.name === 'Quality').values[0][0] : '0';
+
+        price = this.priceService.pricecheckGem(item.name, parseInt(level, 10), parseInt(quality, 10));
+        return price ? price.mean : 0;
+      case 5: // Currency
+
+        break;
+      case 7: // Divination Card
+
+        break;
+      case 8: // Prophecy
+
+        break;
+      case 9: // Relic
+
+        break;
+
+      default:
+        return this.priceService.pricecheckItemByName(item.name).mean;
+    }
+
   }
 
   calculateTotalNetWorth(netWorthItemArray: NetWorthItem[]): number {
@@ -228,6 +269,19 @@ export class NetworthService {
   // Note to self: This is completely retarded
   clearHistory() {
     this.netWorthHistory = this.settingsService.get('networth');
+  }
+
+  getItemLinks(arr) { // Get mode frequency
+    const numMapping = {};
+    let greatestFreq = 0;
+    arr.forEach(function findMode(number) {
+      numMapping[number] = (numMapping[number] || 0) + 1;
+
+      if (greatestFreq < numMapping[number]) {
+        greatestFreq = numMapping[number];
+      }
+    });
+    return greatestFreq;
   }
 
 }

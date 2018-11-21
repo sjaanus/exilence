@@ -45,8 +45,27 @@ export class PriceService {
     return this.ItemsWithPrice.find(t => t.name === name);
   }
 
-  pricecheckItem(name: string, links: number = null, ilvl: number = null, variation: string = null): CombinedItemPriceInfo {
-    return this.ItemsWithPrice.find(t => t.name === name && t.links === links && t.ilvl === ilvl && t.variation === variation);
+  pricecheckItem(baseType: string, ilvl: number = null, variation: string = null): CombinedItemPriceInfo {
+    return this.ItemsWithPrice.find(t =>
+      t.type === baseType &&
+      t.ilvl === ilvl &&
+      t.variation === variation
+    );
+  }
+
+  pricecheckUniqueItem(name: string, links: number = null): CombinedItemPriceInfo {
+    return this.ItemsWithPrice.find(t =>
+      t.name === name &&
+      t.links === links
+    );
+  }
+
+  pricecheckGem(name: string, level: number, quality: number): CombinedItemPriceInfo {
+    return this.ItemsWithPrice.find(t =>
+      t.lvl === level &&
+      t.quality === quality &&
+      t.name === name
+    );
   }
 
   pricecheckItems(itemIds: number[]) {

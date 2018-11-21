@@ -17,7 +17,6 @@ import { Stash } from '../interfaces/stash.interface';
 import { AnalyticsService } from './analytics.service';
 import { ElectronService } from './electron.service';
 import { LogService } from './log.service';
-import { Character } from '../interfaces/character.interface';
 
 @Injectable()
 export class ExternalService {
@@ -93,7 +92,7 @@ export class ExternalService {
       });
   }
 
-  getStashTab(sessionId: string, account: string, league: string, index: number): Observable<Stash> {
+  getStashTab(sessionId: string, account: string, league: string, index: any): Observable<Stash> {
     this.analyticsService.sendEvent('income', `GET Stashtab`);
     this.setCookie(sessionId);
     const parameters = `?league=${league}&accountName=${account}&tabIndex=${index}&tabs=1`;
