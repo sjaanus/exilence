@@ -10,6 +10,23 @@
     }
 }
 
+.sidenav-container {
+    
+    .bottom-area-wrapper {
+        position: absolute;
+        bottom: 15px;
+        width: 265px !important;
+        display: flex;
+
+        .discord-logo {
+            flex: 1;
+            cursor: pointer;
+            content:url("./../../assets/img/discord-logo-white.svg");
+        }
+    }
+}
+
+
 .sidenav-form {
     padding: $container-padding;
 }

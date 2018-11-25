@@ -8,7 +8,6 @@ import { RouterModule } from '@angular/router';
 import { AnalyticsService } from '../shared/providers/analytics.service';
 import { KeybindService } from '../shared/providers/keybind.service';
 import { LadderService } from '../shared/providers/ladder.service';
-import { LogMonitorService } from '../shared/providers/log-monitor.service';
 import { MapService } from '../shared/providers/map.service';
 import { MessageValueService } from '../shared/providers/message-value.service';
 import { NetworthService } from '../shared/providers/networth.service';
@@ -46,7 +45,6 @@ import { TradingModule } from './trading/trading.module';
   providers: [
     KeybindService,
     MessageValueService,
-    LogMonitorService,
     PartyService,
     PriceService,
     NetworthService,

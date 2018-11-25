@@ -6,6 +6,8 @@ import { Player } from '../shared/interfaces/player.interface';
 import { AccountService } from '../shared/providers/account.service';
 import { NetworthService } from '../shared/providers/networth.service';
 import { PartyService } from '../shared/providers/party.service';
+import { MessageValueService } from '../shared/providers/message-value.service';
+import { ElectronService } from '../shared/providers/electron.service';
 
 @Component({
   selector: 'app-authorize',
@@ -19,6 +21,8 @@ export class AuthorizeComponent implements OnInit {
     public partyService: PartyService,
     private accountService: AccountService,
     private networthService: NetworthService,
+    private messageValueService: MessageValueService,
+    private electronService: ElectronService,
     private router: Router) {
     this.form = fb.group({
       partyCode: [this.partyService.party.name !== '' ? this.partyService.party.name : this.generatePartyName(),
@@ -30,6 +34,10 @@ export class AuthorizeComponent implements OnInit {
     this.accountService.player.subscribe(res => {
       this.player = res;
     });
+  }
+
+  openLink(link: string) {
+    this.electronService.shell.openExternal(link);
   }
 
   generatePartyName(): string {
@@ -44,7 +52,6 @@ export class AuthorizeComponent implements OnInit {
   enterParty() {
     this.partyService.leaveParty(this.partyService.party.name, this.player);
     this.partyService.joinParty(this.form.controls.partyCode.value.toUpperCase(), this.player);
-    // this.incomeService.Snapshot();
     this.networthService.Snapshot();
     this.partyService.addPartyToRecent(this.form.controls.partyCode.value.toUpperCase());
     this.router.navigateByUrl('/404', { skipLocationChange: true }).then(() =>

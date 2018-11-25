@@ -1,9 +1,27 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
-## [0.6.2] - 2018-11-XX
+## [0.7.3] - 2018-11-25
+- Fix for snapshots not getting triggered
+
+## [0.7.2] - 2018-11-22
+- Hotfix for missing logo (again)
+
+## [0.7.1] - 2018-11-22
+- Hotfix for missing logo
+
+## [0.7.0] - 2018-11-22
+- Fixed date-column in map-tab, should now be accurate and show additional information
+- Fixed time-column in map-tab, should now be accurate
+- Changed how duration is calculated for areas to be more reliable
+- Now hides zones which you've been in for more than 30 minutes (probable logout)
+- Added option to choose what zones to track (maps only, or all zones)
+- Added the ability to import your Client.txt (to see all your maphistory)
 - Added support for private profiles (requires a sessionId to work)
+- Reworked handling of area-events to be more accurate
 - Added a setting to enable/disable resizing of the window, instead of setting it enabled by default
+- Added Discord-link to sidemenu
+- Changed the layout of the league-selection step in the login-process to be more descriptive
 - Now saves history for net worth and areas forever (for yourself only)
 - Messages are now posted to your current party instead of local chat
 - Reworked layout for some of the tabs on the settings-page

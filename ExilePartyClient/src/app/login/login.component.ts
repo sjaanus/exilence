@@ -21,6 +21,9 @@ import { NetworthService } from '../shared/providers/networth.service';
 import { PriceService } from '../shared/providers/price.service';
 import { SessionService } from '../shared/providers/session.service';
 import { SettingsService } from '../shared/providers/settings.service';
+import { LogMonitorService } from '../shared/providers/log-monitor.service';
+import { MapService } from '../shared/providers/map.service';
+import { InfoDialogComponent } from '../authorize/components/info-dialog/info-dialog.component';
 
 @Component({
     selector: 'app-login',
@@ -37,9 +40,11 @@ export class LoginComponent implements OnInit {
     pathValid = false;
     isLoading = false;
     isFetching = false;
+    isParsing = false;
     isFetchingLeagues = false;
     fetchedLeagues = false;
     fetched = false;
+    parsingEnabled = false;
     characterList: Character[] = [];
     leagues: League[];
     tradeLeagues: League[];
@@ -72,7 +77,8 @@ export class LoginComponent implements OnInit {
         private ladderService: LadderService,
         private priceService: PriceService,
         private dialog: MatDialog,
-        private networthService: NetworthService
+        public logMonitorService: LogMonitorService,
+        private mapService: MapService
     ) {
 
 
@@ -99,11 +105,39 @@ export class LoginComponent implements OnInit {
             filePath: [this.filePath !== undefined ? this.filePath :
                 'C:/Program Files (x86)/Steam/steamapps/common/Path of Exile/logs/Client.txt', Validators.required]
         });
+
+        this.parsingEnabled = this.parsingEnabled !== undefined ? this.parsingEnabled : false;
+        this.logMonitorService.trackMapsOnly = this.logMonitorService.trackMapsOnly !== undefined ?
+            this.logMonitorService.trackMapsOnly : true;
+
+        // reset data for parser. if we logged out we should behave as a new player, not using current data
+        this.mapService.previousInstanceServer = undefined;
+        this.mapService.previousDate = undefined;
+        this.mapService.currentArea = undefined;
     }
 
     checkPath() {
         this.pathValid = this.electronService.fs.existsSync(this.pathFormGroup.controls.filePath.value)
             && this.pathFormGroup.controls.filePath.value.toLowerCase().endsWith('client.txt');
+    }
+
+    parseLog() {
+        if (this.parsingEnabled) {
+            this.isParsing = true;
+            this.logMonitorService.parsingCompleted = false;
+            if (this.logMonitorService.entireLog !== undefined) {
+                this.logMonitorService.removeLogParser();
+            }
+            this.logMonitorService.instantiateLogParser(this.pathFormGroup.controls.filePath.value);
+            this.logMonitorService.entireLog.parseLog();
+            this.mapService.areasParsed.subscribe(res => {
+                this.areaHistory = this.settingsService.get('areas');
+                this.logMonitorService.parsingCompleted = true;
+                this.isParsing = false;
+
+                this.stepper.selectedIndex = 5;
+            });
+        }
     }
 
     openLink(link: string) {
@@ -133,9 +167,11 @@ export class LoginComponent implements OnInit {
         this.leagueName = this.settingsService.get('account.leagueName');
         this.tradeLeagueName = this.settingsService.get('account.tradeLeagueName');
         this.sessionIdValid = this.settingsService.get('account.sessionIdValid');
+        this.parsingEnabled = this.settingsService.get('account.parsingEnabled');
         this.filePath = this.settingsService.get('account.filePath');
         this.netWorthHistory = this.settingsService.get('networth');
         this.areaHistory = this.settingsService.get('areas');
+        this.logMonitorService.trackMapsOnly = this.settingsService.get('trackMapsOnly');
 
         if (this.areaHistory === undefined) {
             this.areaHistory = [];
@@ -176,6 +212,7 @@ export class LoginComponent implements OnInit {
             this.tradeLeagueName !== undefined &&
             this.sessionIdValid !== undefined &&
             this.filePath !== undefined &&
+            this.parsingEnabled !== undefined &&
             this.netWorthHistory !== undefined &&
             this.areaHistory !== undefined) {
 
@@ -185,6 +222,10 @@ export class LoginComponent implements OnInit {
 
             this.getLeagues(undefined, false);
             this.getCharacterList(undefined, false);
+
+            if (!this.logMonitorService.parsingCompleted) {
+                this.parseLog();
+            }
         }
     }
 
@@ -282,6 +323,7 @@ export class LoginComponent implements OnInit {
             tradeLeagueName: this.leagueFormGroup.controls.tradeLeagueName.value,
             sessionId: this.sessFormGroup.controls.sessionId.value,
             filePath: this.pathFormGroup.controls.filePath.value,
+            parsingEnabled: this.parsingEnabled,
             sessionIdValid: this.sessionIdValid
         } as AccountInfo;
     }
@@ -292,10 +334,12 @@ export class LoginComponent implements OnInit {
     }
 
     directorySelectorCallback(filePath) {
-        this.pathFormGroup.controls.filePath.setValue(filePath[0]);
-        setTimeout(() => {
-            this.checkPath();
-        }, 500);
+        if (filePath !== undefined) {
+            this.pathFormGroup.controls.filePath.setValue(filePath[0]);
+            setTimeout(() => {
+                this.checkPath();
+            }, 500);
+        }
     }
 
     checkLeagueChange(event) {
@@ -359,6 +403,29 @@ export class LoginComponent implements OnInit {
         });
     }
 
+    openLogInfoDialog(): void {
+        setTimeout(() => {
+            if (!this.settingsService.get('diaShown_loginfo') && !this.settingsService.get('hideTooltips')) {
+                const dialogRef = this.dialog.open(InfoDialogComponent, {
+                    width: '650px',
+                    data: {
+                        icon: 'warning',
+                        title: 'Warning',
+                        // tslint:disable-next-line:max-line-length
+                        content: 'We recommend deleting the Client.txt before every league.<br/><br/>' +
+                            'If its very large it might impact performance of the app.'
+                    }
+                });
+                dialogRef.afterClosed().subscribe(result => {
+                    this.settingsService.set('diaShown_loginfo', true);
+                    this.parseLog();
+                });
+            } else {
+                this.parseLog();
+            }
+        });
+    }
+
     completeLogin() {
         this.player.account = this.form.accountName;
         this.player.netWorthSnapshots = this.netWorthHistory.history;
@@ -388,6 +455,7 @@ export class LoginComponent implements OnInit {
             this.priceService.Update(this.leagueFormGroup.controls.tradeLeagueName.value);
 
             this.settingsService.set('account', this.form);
+            this.settingsService.set('trackMapsOnly', this.logMonitorService.trackMapsOnly);
             this.sessionService.initSession(this.form.sessionId);
             this.isLoading = false;
             this.settingsService.set('lastLeague', this.leagueFormGroup.controls.leagueName.value);

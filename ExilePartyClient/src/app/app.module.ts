@@ -27,7 +27,9 @@ import { AccountService } from './shared/providers/account.service';
 import { AlertService } from './shared/providers/alert.service';
 import { ElectronService } from './shared/providers/electron.service';
 import { ExternalService } from './shared/providers/external.service';
+import { LogMonitorService } from './shared/providers/log-monitor.service';
 import { LogService } from './shared/providers/log.service';
+import { MapService } from './shared/providers/map.service';
 import { NinjaService } from './shared/providers/ninja.service';
 import { RobotService } from './shared/providers/robot.service';
 import { SessionService } from './shared/providers/session.service';
@@ -78,7 +80,9 @@ export function HttpLoaderFactory(http: HttpClient) {
     UpperCasePipe,
     DatePipe,
     NinjaService,
-    AlertService
+    AlertService,
+    LogMonitorService,
+    MapService
   ],
   bootstrap: [AppComponent]
 })
