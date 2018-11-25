@@ -208,10 +208,11 @@ export class NetworthService {
 
     switch (item.frameType) {
       case 0: // Normal
-      case 1: // Magic
-      case 2: // Rare
         price = this.priceService.pricecheckItem(item.typeLine, item.ilvl, elderOrShaper);
         return price ? price.mean : 0;
+      case 1: // Magic
+      case 2: // Rare
+        break;
       case 3: // Unique
         price = this.priceService.pricecheckUniqueItem(item.name, null);
         return price ? price.mean : 0;
@@ -224,16 +225,11 @@ export class NetworthService {
         price = this.priceService.pricecheckGem(item.name, parseInt(level, 10), parseInt(quality, 10));
         return price ? price.mean : 0;
       case 5: // Currency
-
-        break;
-      case 7: // Divination Card
-
-        break;
+      case 6: // Divination Card
       case 8: // Prophecy
-
-        break;
+        price = this.priceService.pricecheckItemByName(item.typeLine);
+        return price ? price.mean : 0;
       case 9: // Relic
-
         break;
 
       default:
