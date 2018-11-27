@@ -98,6 +98,7 @@ export class NetworthService {
 
   Snapshot() {
 
+    this.priceService.UpdateItemsAndPrices(this.localPlayer.character.league);
     this.updateUsedParams();
     this.removePlaceholderIfNeeded();
 
@@ -208,13 +209,13 @@ export class NetworthService {
 
     switch (item.frameType) {
       case 0: // Normal
-        price = this.priceService.pricecheckItem(item.typeLine, item.ilvl, elderOrShaper);
+        price = this.priceService.pricecheckBase(item.typeLine, item.ilvl, elderOrShaper);
         return price ? price.mean : 0;
       case 1: // Magic
       case 2: // Rare
         break;
       case 3: // Unique
-        price = this.priceService.pricecheckUniqueItem(item.name, null);
+        price = this.priceService.pricecheckUnique(item.name, null);
         return price ? price.mean : 0;
       case 4: // Gem
         const level = item.properties.find(t => t.name === 'Level').values[0][0];
@@ -227,13 +228,13 @@ export class NetworthService {
       case 5: // Currency
       case 6: // Divination Card
       case 8: // Prophecy
-        price = this.priceService.pricecheckItemByName(item.typeLine);
+        price = this.priceService.pricecheckByName(item.typeLine);
         return price ? price.mean : 0;
       case 9: // Relic
         break;
 
       default:
-        return this.priceService.pricecheckItemByName(item.name).mean;
+        return this.priceService.pricecheckByName(item.name).mean;
     }
 
   }

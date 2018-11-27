@@ -4,6 +4,7 @@ import { MatDialog, MatStep, MatStepper } from '@angular/material';
 import { Router } from '@angular/router';
 import { forkJoin } from 'rxjs';
 
+import { InfoDialogComponent } from '../authorize/components/info-dialog/info-dialog.component';
 import { LeagueChangedDialogComponent } from '../shared/components/league-changed-dialog/league-changed-dialog.component';
 import { AccountInfo } from '../shared/interfaces/account-info.interface';
 import { ExtendedAreaInfo } from '../shared/interfaces/area.interface';
@@ -17,13 +18,11 @@ import { AnalyticsService } from '../shared/providers/analytics.service';
 import { ElectronService } from '../shared/providers/electron.service';
 import { ExternalService } from '../shared/providers/external.service';
 import { LadderService } from '../shared/providers/ladder.service';
-import { NetworthService } from '../shared/providers/networth.service';
+import { LogMonitorService } from '../shared/providers/log-monitor.service';
+import { MapService } from '../shared/providers/map.service';
 import { PriceService } from '../shared/providers/price.service';
 import { SessionService } from '../shared/providers/session.service';
 import { SettingsService } from '../shared/providers/settings.service';
-import { LogMonitorService } from '../shared/providers/log-monitor.service';
-import { MapService } from '../shared/providers/map.service';
-import { InfoDialogComponent } from '../authorize/components/info-dialog/info-dialog.component';
 
 @Component({
     selector: 'app-login',
@@ -81,6 +80,7 @@ export class LoginComponent implements OnInit {
         private mapService: MapService
     ) {
 
+        this.settingsService.deleteAll();
 
         this.externalService.leagues.subscribe((res: League[]) => {
             this.leagues = res;
@@ -452,7 +452,7 @@ export class LoginComponent implements OnInit {
 
             this.accountService.loggingIn = false;
 
-            this.priceService.Update(this.leagueFormGroup.controls.tradeLeagueName.value);
+            this.priceService.UpdateItemsAndPrices(this.leagueFormGroup.controls.tradeLeagueName.value);
 
             this.settingsService.set('account', this.form);
             this.settingsService.set('trackMapsOnly', this.logMonitorService.trackMapsOnly);

@@ -14,7 +14,6 @@ import { LogService } from './log.service';
 })
 export class PriceService {
 
-  private version: string;
   private poeWatchBaseUrl = 'https://api.poe.watch';
   private itemData: ItemInfo[] = [];
   private itemPrices: ItemPrice[] = [];
@@ -28,24 +27,23 @@ export class PriceService {
   ) {
   }
 
-  Update(league: string) {
-    console.log('Update triggered from price.service.ts');
+  UpdateItemsAndPrices(league: string) {
+    this.logService.log('Starting to fetch items and prices from poe.watch');
     forkJoin([this.fetchPrices(league), this.fetchItems()]).subscribe(res => {
       this.itemPrices = res[0];
       this.itemData = res[1];
       this.ItemsWithPrice = this.itemData.map(x => Object.assign(x, this.itemPrices.find(y => y.id === x.id)));
+      this.logService.log('Finished fetching items and prices from poe.watch');
     });
   }
 
-  pricecheckItemById(itemId: number) {
-    return this.ItemsWithPrice.find(t => t.id === itemId);
-  }
+  //#region Pricecheck Methods
 
-  pricecheckItemByName(name: string) {
+  pricecheckByName(name: string) {
     return this.ItemsWithPrice.find(t => t.name === name);
   }
 
-  pricecheckItem(baseType: string, ilvl: number = null, variation: string = null): CombinedItemPriceInfo {
+  pricecheckBase(baseType: string, ilvl: number = null, variation: string = null): CombinedItemPriceInfo {
     return this.ItemsWithPrice.find(t =>
       t.type === baseType &&
       t.ilvl === ilvl &&
@@ -53,7 +51,7 @@ export class PriceService {
     );
   }
 
-  pricecheckUniqueItem(name: string, links: number = null): CombinedItemPriceInfo {
+  pricecheckUnique(name: string, links: number = null): CombinedItemPriceInfo {
     return this.ItemsWithPrice.find(t =>
       t.name === name &&
       t.links === links
@@ -68,9 +66,9 @@ export class PriceService {
     );
   }
 
-  pricecheckItems(itemIds: number[]) {
-    return itemIds.forEach(t => this.pricecheckItemById(t));
-  }
+  //#endregion
+
+  //#region External Calls
 
   fetchPrices(league: string): Observable<ItemPrice[]> {
     if (!this.cooldown || this.itemPrices.length === 0) {
@@ -94,9 +92,5 @@ export class PriceService {
     const url = `${this.poeWatchBaseUrl}/itemdata`;
     return this.http.get<ItemInfo[]>(url);
   }
-
-  combinaItemsAndPrices() {
-
-  }
-
+  //#endregion
 }
