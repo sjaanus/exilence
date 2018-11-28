@@ -1,8 +1,12 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
-## [0.7.3] - 2018-11-25
-- Fix for snapshots not getting triggered
+## [0.7.3] - 2018-11-26
+- Added DPS/pDPS/eDPS to weapon-tooltips
+- Added a column that shows which players has an item in the group summary table 
+- Fixed a bug where snapshots didnt get triggered on zone-change
+- Fixed a bug where you could select all stash-tabs (max is 20)
+- Minor style-tweaks
 
 ## [0.7.2] - 2018-11-22
 - Hotfix for missing logo (again)

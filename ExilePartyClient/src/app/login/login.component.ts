@@ -80,8 +80,6 @@ export class LoginComponent implements OnInit {
         private mapService: MapService
     ) {
 
-        this.settingsService.deleteAll();
-
         this.externalService.leagues.subscribe((res: League[]) => {
             this.leagues = res;
         });
@@ -364,6 +362,8 @@ export class LoginComponent implements OnInit {
                 if (result !== undefined) {
                     this.netWorthHistory = result.networthHistory;
                     this.areaHistory = result.areaHistory;
+                    this.player.netWorthSnapshots = this.netWorthHistory.history;
+                    this.player.pastAreas = this.areaHistory;
                 }
             });
         }
