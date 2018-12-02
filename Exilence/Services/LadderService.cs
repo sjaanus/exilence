@@ -59,13 +59,82 @@ namespace Exilence.Services
                 else
                 {
                     return leagueLadder.OrderBy(t => t.Rank.Overall).Take(10).ToList();
-                }                
+                }
             }
 
             return null;
         }
 
         public List<LadderPlayerModel> GetLadderForPlayer(string league, string character)
+        {
+            var characterOnLadder = GetCharacterFromLadder(league, character);
+            if (characterOnLadder != null)
+            {
+                var leagueLadder = LadderStore.GetLadder(league);
+                var index = leagueLadder.IndexOf(characterOnLadder);
+                return GetPartOfLadder(index - 5, index + 5, leagueLadder);
+            }
+
+            return null;
+        }
+
+        public List<LadderPlayerModel> GetGroupDepthLadderForPlayer(string league, string character)
+        {
+            var characterOnLadder = GetCharacterFromLadder(league, character);
+            if (characterOnLadder != null)
+            {
+                var leagueLadder = LadderStore.GetLadder(league).OrderByDescending(t => t.Depth.Group).ToList();
+                var index = leagueLadder.IndexOf(characterOnLadder);
+                return GetPartOfLadder(index - 5, index + 5, leagueLadder);
+            }
+            return null;
+        }
+
+        public List<LadderPlayerModel> GetSoloDepthLadderForPlayer(string league, string character)
+        {
+            var characterOnLadder = GetCharacterFromLadder(league, character);
+            if (characterOnLadder != null)
+            {
+                var leagueLadder = LadderStore.GetLadder(league).OrderByDescending(t => t.Depth.Solo).ToList();
+                var index = leagueLadder.IndexOf(characterOnLadder);
+                return GetPartOfLadder(index - 5, index + 5, leagueLadder);
+            }
+            return null;
+        }
+
+        public List<LadderPlayerModel> GetClassLadderForPlayer(string league, string character)
+        {
+            var characterOnLadder = GetCharacterFromLadder(league, character);
+            if (characterOnLadder != null)
+            {
+                var leagueLadder = LadderStore.GetLadder(league)
+                    .Where(t => t.Class == characterOnLadder.Class)
+                    .OrderBy(t => t.Rank.Class)
+                    .ToList();
+
+                var index = leagueLadder.IndexOf(characterOnLadder);
+                return GetPartOfLadder(index - 5, index + 5, leagueLadder);
+            }
+
+            return null;
+        }
+
+        public List<LadderPlayerModel> GetPartOfLadder(int from, int to, List<LadderPlayerModel> ladder)
+        {
+            var result = new List<LadderPlayerModel>();
+
+            for (int i = from; i <= to; i++)
+            {
+                var element = ladder.ElementAtOrDefault(i);
+                if (element != null)
+                {
+                    result.Add(element);
+                }
+            }
+            return result;
+        }
+
+        public LadderPlayerModel GetCharacterFromLadder(string league, string character)
         {
             if (LadderStore.GetLadderStatus(league) == null)
             {
@@ -75,23 +144,12 @@ namespace Exilence.Services
             {
                 var leagueLadder = LadderStore.GetLadder(league);
                 var characterOnLadder = leagueLadder.FirstOrDefault(t => t.Name == character);
-
-                if (characterOnLadder != null)
-                {
-                    var index = leagueLadder.IndexOf(characterOnLadder);
-                    var before = leagueLadder.Where(t => t.Rank.Overall < characterOnLadder.Rank.Overall && t.Rank.Overall >= (characterOnLadder.Rank.Overall - 5));
-                    var after = leagueLadder.Where(t => t.Rank.Overall > characterOnLadder.Rank.Overall && t.Rank.Overall <= (characterOnLadder.Rank.Overall + 5));
-
-                    var ladderList = new List<LadderPlayerModel>();
-                    ladderList.AddRange(before);
-                    ladderList.AddRange(after);
-                    ladderList.Add(characterOnLadder);
-                    return ladderList.OrderBy(t => t.Rank.Overall).ToList();
-                }
+                return characterOnLadder;
             }
 
             return null;
         }
+
 
         public void UpdateLadders()
         {
@@ -104,7 +162,7 @@ namespace Exilence.Services
                     var pendingStatus = LadderStore.GetLadderStatus(pendingLeague);
                     if (pendingStatus.Finished < DateTime.Now.AddMinutes(-5))
                     {
-                       UpdateLadder(pendingLeague);
+                        UpdateLadder(pendingLeague);
                     }
                 }
             }

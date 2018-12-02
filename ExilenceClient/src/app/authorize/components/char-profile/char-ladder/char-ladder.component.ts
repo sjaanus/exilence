@@ -17,10 +17,7 @@ export class CharLadderComponent implements OnInit {
   form: FormGroup;
   @Input() player: Player;
 
-  averageTimeSpent = '';
-  filteredArr = [];
-
-  private oneHourAgo = (Date.now() - (1 * 60 * 60 * 1000));
+  selectedIndex = 0;
 
   @ViewChild('table') table: LadderTableComponent;
 

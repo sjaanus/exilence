@@ -33,8 +33,17 @@ namespace Exilence.Controllers
         [Route("character")]
         public IActionResult Index(string league, string character)
         {
-            var list = _ladderService.GetLadderForPlayer(league, character);
-            return Ok(new { Ladder = list });
+            var overallLadder = _ladderService.GetLadderForPlayer(league, character);
+            var classLadder = _ladderService.GetClassLadderForPlayer(league, character);
+            var soloDepthLadder = _ladderService.GetSoloDepthLadderForPlayer(league, character);
+            var groupDepthLadder = _ladderService.GetGroupDepthLadderForPlayer(league, character);
+
+            return Ok(new {
+                Ladder = overallLadder,
+                classLadder,
+                soloDepthLadder,
+                groupDepthLadder
+            });
         }
 
         [Route("status")]

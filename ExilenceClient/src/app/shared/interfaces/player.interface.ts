@@ -17,7 +17,14 @@ export interface Player {
     netWorthSnapshots: NetWorthSnapshot[];
     areaInfo: ExtendedAreaInfo;
     pastAreas: ExtendedAreaInfo[];
-    ladderInfo: LadderPlayer[];
+    ladderInfo: LadderInfo;
+}
+
+export interface LadderInfo {
+    ladder: LadderPlayer[];
+    classLadder: LadderPlayer[];
+    soloDepthLadder: LadderPlayer[];
+    groupDepthLadder: LadderPlayer[];
 }
 
 export interface RecentPlayer {

@@ -12,7 +12,7 @@ namespace Exilence.Store
      * Dosen't matter that much tho since both of the implementations are stored in memory, the bad part is
      * that we lose all ladders when we re-deploy the API.
      * */
-    public class LadderStore
+    public static class LadderStore
     {
         private static Dictionary<string, LadderStatusModel> LadderStatus { get; set; }
         private static Dictionary<string, List<LadderPlayerModel>> Ladders { get; set; }

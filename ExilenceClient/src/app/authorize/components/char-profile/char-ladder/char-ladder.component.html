@@ -3,8 +3,8 @@
         <div class="info-wrapper">
             <p class="mat-body-1">
                 This page displays the selected players current ranking on the ladder, as well as players close in the
-                rankings.<br /><br />
-                This page will be refreshed automatically, at most every 2 minutes and in some cases it might take
+                rankings.The page will be refreshed automatically, at most every 5 minutes and in some cases it might
+                take
                 longer.
                 <span class="not-found-message" *ngIf="player != undefined && (player.ladderInfo == null || player.ladderInfo.length == 0)">
                     <br /><br />
@@ -16,7 +16,37 @@
     </div>
     <div class="table-outer-wrapper">
         <div class="ladder-table-wrapper">
-            <app-ladder-table #table [player]="player"></app-ladder-table>
+
+            <mat-tab-group #subTabGroup id="subTabGroup" [(selectedIndex)]="selectedIndex">
+                <mat-tab #ladderTab id="ladderTab" class="active">
+                    <ng-template mat-tab-label>
+                        Overall
+                    </ng-template>
+                </mat-tab>
+                <mat-tab #delveTab id="classTab">
+                    <ng-template mat-tab-label>
+                        Class
+                    </ng-template>
+                </mat-tab>
+                <mat-tab #delveTab id="delveSoloTab">
+                    <ng-template mat-tab-label>
+                        Delve solo
+                    </ng-template>
+                </mat-tab>
+                <mat-tab #delveTab id="delveGroupTab">
+                    <ng-template mat-tab-label>
+                        Delve group
+                    </ng-template>
+                </mat-tab>
+            </mat-tab-group>
+
+            <div class="tab-content" [hidden]="selectedIndex != 0">
+                <app-ladder-table #table [player]="player"></app-ladder-table>
+            </div>
+            <div class="tab-content" [hidden]="selectedIndex != 1">
+                Delve stuff here
+            </div>
+
         </div>
     </div>
 </div>

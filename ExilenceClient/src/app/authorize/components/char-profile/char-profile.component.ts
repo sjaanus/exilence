@@ -1,17 +1,13 @@
 import { Component, Input, OnInit, ViewChild } from '@angular/core';
 import { MatTab, MatTabGroup } from '@angular/material';
-import { Router } from '@angular/router';
 
 import { Player } from '../../../shared/interfaces/player.interface';
 import { AnalyticsService } from '../../../shared/providers/analytics.service';
 import { ElectronService } from '../../../shared/providers/electron.service';
-import { ExternalService } from '../../../shared/providers/external.service';
 import { PartyService } from '../../../shared/providers/party.service';
-import { SessionService } from '../../../shared/providers/session.service';
-import { LadderService } from '../../../shared/providers/ladder.service';
-import { CharWealthComponent } from './char-wealth/char-wealth.component';
-import { CharMapsComponent } from './char-maps/char-maps.component';
 import { CharEquipmentComponent } from './char-equipment/char-equipment.component';
+import { CharMapsComponent } from './char-maps/char-maps.component';
+import { CharWealthComponent } from './char-wealth/char-wealth.component';
 
 @Component({
   selector: 'app-char-profile',
@@ -32,16 +28,11 @@ export class CharProfileComponent implements OnInit {
 
   constructor(
     private partyService: PartyService,
-    private sessionService: SessionService,
-    private externalService: ExternalService,
-    private router: Router,
     private electronService: ElectronService,
     private analyticsService: AnalyticsService,
-    private ladderService: LadderService
   ) {
     this.analyticsService.sendScreenview('/authorized/party/player/profile');
   }
-
 
   ngOnInit() {
     if (!this.localProfile) {
@@ -59,7 +50,6 @@ export class CharProfileComponent implements OnInit {
         this.player = res;
       });
     }
-
 
     // select first tab
     this.equipmentTab.isActive = true;
@@ -93,15 +83,16 @@ export class CharProfileComponent implements OnInit {
       }
     }
   }
+
   openLink(link: string) {
     this.electronService.shell.openExternal(link);
   }
+
   goToProfile() {
     this.openLink('https://www.pathofexile.com/account/view-profile/'
       + this.player.account
       + '/characters?characterName='
       + this.player.character.name);
   }
-
 
 }

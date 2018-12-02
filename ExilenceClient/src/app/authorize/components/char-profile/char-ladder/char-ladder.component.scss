@@ -1,5 +1,9 @@
 @import "./../../../../../assets/styles/_variables.scss";
 
+.tab-icon {
+    margin-right: 8px;
+}
+
 .char-ladder {
     width: 684px;
     height: calc(100% - 85px);
@@ -10,12 +14,10 @@
     transform-origin: top left;
 
     .info-container {
-        margin: 25px;
+        margin: 25px 0px 0px 24px;
         display: flex;
 
         .info-wrapper {
-            width: 60%;
-
             p {
                 margin-top: 0;
             }
@@ -25,22 +27,6 @@
                 color: #ff5858;
             }
         }
-
-        .link-wrapper {
-            text-align: right;
-
-            .title {
-                font-size: 14px;
-
-                .poeracing-link {
-                    color: $primary;
-                    font-weight: 500;
-                    text-decoration: underline;
-                }
-            }
-
-            width: 40%;
-        }
     }
 
     .table-outer-wrapper {
@@ -48,7 +34,6 @@
         width: calc(100% - 50px);
         padding-left: 25px;
         margin-right: 25px;
-        margin-top: 45px;
         margin-bottom: 25px;
 
         .ladder-table-wrapper {
