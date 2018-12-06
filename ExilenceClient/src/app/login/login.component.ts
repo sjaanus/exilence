@@ -23,6 +23,7 @@ import { LogMonitorService } from '../shared/providers/log-monitor.service';
 import { MapService } from '../shared/providers/map.service';
 import { SessionService } from '../shared/providers/session.service';
 import { SettingsService } from '../shared/providers/settings.service';
+import { ItemContextMenuComponent } from '../authorize/components/item-context-menu/item-context-menu.component';
 
 @Component({
     selector: 'app-login',
@@ -64,6 +65,8 @@ export class LoginComponent implements OnInit {
 
     @ViewChild('stepper') stepper: MatStepper;
     @ViewChild('lastStep') lastStep: MatStep;
+
+    @ViewChild('contextmenu') contextMenu: ItemContextMenuComponent;
 
     constructor(@Inject(FormBuilder) fb: FormBuilder,
         private router: Router,
@@ -272,6 +275,10 @@ export class LoginComponent implements OnInit {
                 }, 500);
             }
         });
+    }
+
+    openContextMenu() {
+        this.contextMenu.openContextMenu();
     }
 
     mapTradeLeague(event) {

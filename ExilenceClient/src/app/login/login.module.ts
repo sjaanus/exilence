@@ -11,6 +11,7 @@ import { LeagueChangedDialogModule } from '../shared/components/league-changed-d
 import { LeagueChangedDialogComponent } from '../shared/components/league-changed-dialog/league-changed-dialog.component';
 import { InfoDialogComponent } from '../authorize/components/info-dialog/info-dialog.component';
 import { InfoDialogModule } from '../authorize/components/info-dialog/info-dialog.module';
+import { ItemContextMenuModule } from '../authorize/components/item-context-menu/item-context-menu.module';
 
 @NgModule({
   imports: [
@@ -28,7 +29,8 @@ import { InfoDialogModule } from '../authorize/components/info-dialog/info-dialo
     MatFormFieldModule,
     MatProgressBarModule,
     InfoDialogModule,
-    LeagueChangedDialogModule
+    LeagueChangedDialogModule,
+    ItemContextMenuModule
   ],
   declarations: [LoginComponent],
   entryComponents: [LeagueChangedDialogComponent, InfoDialogComponent]

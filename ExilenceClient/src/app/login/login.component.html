@@ -122,6 +122,8 @@
         </mat-progress-bar>
         <br />
       </ng-container>
+      <div (contextmenu)="openContextMenu()">TEST</div>
+      <app-item-context-menu #contextmenu></app-item-context-menu>
       <span class="mat-body-1">We're using Google Analytics to track usage of our app in order to be able to improve it
         further.<br />
         This data is not shared with anyone ever, and we don't track or save any data related to your character or
