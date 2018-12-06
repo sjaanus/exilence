@@ -66,8 +66,6 @@ export class LoginComponent implements OnInit {
     @ViewChild('stepper') stepper: MatStepper;
     @ViewChild('lastStep') lastStep: MatStep;
 
-    @ViewChild('contextmenu') contextMenu: ItemContextMenuComponent;
-
     constructor(@Inject(FormBuilder) fb: FormBuilder,
         private router: Router,
         private externalService: ExternalService,
@@ -275,10 +273,6 @@ export class LoginComponent implements OnInit {
                 }, 500);
             }
         });
-    }
-
-    openContextMenu() {
-        this.contextMenu.openContextMenu();
     }
 
     mapTradeLeague(event) {

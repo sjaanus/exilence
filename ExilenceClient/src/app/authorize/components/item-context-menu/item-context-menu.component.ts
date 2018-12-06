@@ -1,6 +1,7 @@
 import { Component, OnInit, ViewChild, Input } from '@angular/core';
 import { MatMenuTrigger, MatMenu } from '@angular/material';
 import { Item } from '../../../shared/interfaces/item.interface';
+import { RobotService } from '../../../shared/providers/robot.service';
 
 @Component({
     selector: 'app-item-context-menu',
@@ -9,10 +10,10 @@ import { Item } from '../../../shared/interfaces/item.interface';
 })
 export class ItemContextMenuComponent implements OnInit {
 
-    @Input() item = 'asdasd';
+    @Input() item: Item;
     @ViewChild(MatMenuTrigger) trigger: MatMenuTrigger;
 
-    constructor() {
+    constructor(private robotService: RobotService) {
     }
 
     ngOnInit() {
@@ -20,5 +21,9 @@ export class ItemContextMenuComponent implements OnInit {
 
     openContextMenu() {
         this.trigger.openMenu();
+    }
+
+    copy() {
+        this.robotService.setTextToClipboard(this.item.typeLine);
     }
 }

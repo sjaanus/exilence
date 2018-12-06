@@ -1,4 +1,4 @@
 <div [matMenuTriggerFor]="menu"></div>
 <mat-menu #menu="matMenu">
-  <button mat-menu-item>{{item}}</button>
+  <button mat-menu-item (click)="copy()">Copy to clipboard</button>
 </mat-menu>

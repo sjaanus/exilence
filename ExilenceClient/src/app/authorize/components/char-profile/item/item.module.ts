@@ -5,10 +5,12 @@ import { SharedModule } from '../../../../shared/shared.module';
 import { ItemTooltipComponent } from './item-tooltip/item-tooltip.component';
 import { ItemTooltipContentComponent } from './item-tooltip/item-tooltip-content/item-tooltip-content.component';
 import { ItemService } from './item.service';
+import { ItemContextMenuModule } from '../../item-context-menu/item-context-menu.module';
 
 @NgModule({
   imports: [
     SharedModule,
+    ItemContextMenuModule
   ],
   declarations: [ItemComponent, ItemSocketsComponent, ItemTooltipComponent, ItemTooltipContentComponent],
   exports: [ItemComponent, ItemSocketsComponent, ItemTooltipComponent, ItemTooltipContentComponent],

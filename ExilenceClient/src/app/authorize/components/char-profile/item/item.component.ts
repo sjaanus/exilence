@@ -1,6 +1,7 @@
 import { Component, OnInit, Input, ElementRef, ViewChildren, ViewChild } from '@angular/core';
 import { Item } from '../../../../shared/interfaces/item.interface';
 import { ItemTooltipComponent } from './item-tooltip/item-tooltip.component';
+import { ItemContextMenuComponent } from '../../item-context-menu/item-context-menu.component';
 
 @Component({
   selector: 'app-item',
@@ -13,6 +14,7 @@ export class ItemComponent implements OnInit {
   @Input() weaponSwap = false;
   @Input() extendHeightWith = 0;
   @ViewChild('tooltip') tooltip: ItemTooltipComponent;
+  @ViewChild('contextmenu') contextMenu: ItemContextMenuComponent;
 
   constructor(public el: ElementRef) { }
 
@@ -24,4 +26,9 @@ export class ItemComponent implements OnInit {
       this.tooltip.reposition(this.el);
     }
   }
+
+  openContextMenu() {
+    this.contextMenu.openContextMenu();
+  }
+
 }
