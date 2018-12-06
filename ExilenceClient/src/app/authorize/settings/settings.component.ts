@@ -22,6 +22,7 @@ export class SettingsComponent implements OnInit {
   alwaysOnTop = false;
   isResizable = false;
   hideTooltips = false;
+  lowConfidencePricing = false;
   sessionId: string;
   sessionIdValid: boolean;
   uploaded = false;
@@ -123,10 +124,18 @@ export class SettingsComponent implements OnInit {
     }
 
     const hideTooltipsSetting = this.settingsService.get('hideTooltips');
-
     if (hideTooltipsSetting !== undefined) {
       this.hideTooltips = hideTooltipsSetting;
     }
+
+    const lowConfidencePricingSetting = this.settingsService.get('lowConfidencePricing');
+    if (lowConfidencePricingSetting !== undefined) {
+      this.lowConfidencePricing = lowConfidencePricingSetting;
+    }
+  }
+
+  openLink(link: string) {
+    this.electronService.shell.openExternal(link);
   }
 
   resetKeybinds() {
@@ -188,8 +197,17 @@ export class SettingsComponent implements OnInit {
     }
   }
 
+  toggleLowConfidencePricing() {
+    if (this.lowConfidencePricing) {
+      this.settingsService.set('lowConfidencePricing', true);
+    } else {
+      this.settingsService.set('lowConfidencePricing', false);
+    }
+  }
+
   resetDialogs() {
     this.settingsService.set('diaShown_wealth', false);
+    this.settingsService.set('diaShown_dashboard', false);
     this.settingsService.set('diaShown_equipment', false);
     this.settingsService.set('diaShown_maps', false);
     this.settingsService.set('diaShown_loginfo', false);

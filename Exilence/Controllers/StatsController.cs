@@ -9,7 +9,7 @@ using Microsoft.Extensions.Caching.Distributed;
 using Exilence.Helper;
 using Microsoft.Extensions.Logging;
 using Exilence.Models.Ladder;
-using Exilence.Store;
+using Exilence.Models.Connection;
 
 namespace Exilence
 {
@@ -18,11 +18,15 @@ namespace Exilence
     {
         private IDistributedCache _cache;
         private ILogger<StatsController> _log;
+        private IStoreRepository _storeRepository;
+        private IRedisRepository _redisRepository;
 
-        public StatsController(IDistributedCache cache, ILogger<StatsController> log)
+        public StatsController(IDistributedCache cache, ILogger<StatsController> log, IStoreRepository storeRepository, IRedisRepository redisRepository)
         {
             _log = log;
             _cache = cache;
+            _storeRepository = storeRepository;
+            _redisRepository = redisRepository;
         }
 
         // GET: /<controller>/
@@ -30,36 +34,54 @@ namespace Exilence
         public async Task<IActionResult> Index()
         {
             var partyList = new List<PartyStatistics>();
+            var connectionsWithoutParty = new List<string>();
+
             int players = 0;
 
-            var parties = await _cache.GetAsync<Dictionary<string, string>>("ConnectionIndex") ?? new Dictionary<string, string>();
-
-            foreach (var partyName in parties.Select(t => t.Value).Distinct().ToList())
-            {   
-                if (partyName != null)
+            var connections = await _redisRepository.GetAllConnections();
+            if (connections != null)
+            {
+                foreach (var connection in connections.Distinct().ToList())
                 {
-                    var party = await _cache.GetAsync<PartyModel>($"party:{partyName}");
-                    PartyStatistics partyStats = new PartyStatistics { };
-                    partyStats.Players = party.Players.Select(t => t.Character.Name).ToList();
-                    partyList.Add(partyStats);
-                    players += partyStats.Players.Count;
+                    if (connection.PartyName != null)
+                    {
+                        var party = await _redisRepository.GetParty(connection.PartyName);
+                        if (party != null)
+                        {
+                            PartyStatistics partyStats = new PartyStatistics { };
+                            partyStats.Players = party.Players.Select(t => t.Character.Name).ToList();
+                            partyList.Add(partyStats);
+                            players += partyStats.Players.Count;
+                        }
+                        else
+                        {
+                            connectionsWithoutParty.Add(connection.ConnectionId);
+                            //await _redisRepository.RemoveConnection(connection.ConnectionId);
+                        }
+                    }
                 }
-
             }
 
-            var statuses = LadderStore.GeAllLadderStatuses();
+            var statuses = await _redisRepository.GetAllLeaguesLadders();
+
+            if (statuses == null)
+            {
+                statuses = new List<LadderStoreModel>();
+            }
 
             var response = new
             {
                 totalParties = partyList.Count(),
                 totalPlayers = players,
+                leagues = statuses.Select(t => new { t.Name, t.Running, t.Finished, t.Started }).OrderByDescending(t => t.Finished).Select(x => new {
+                    Name = x.Name,
+                    Running = x.Running,
+                    Started = x.Started.ToString("yyyy-MM-dd HH:mm:ss"),
+                    Finished = x.Finished.ToString("yyyy-MM-dd HH:mm:ss")
+                }),
+                connectionsWithoutParty,
                 parties = partyList,
-                leagues = statuses.OrderByDescending(t => t.Value.Finished).Select(x => new {
-                    Name = x.Key,
-                    Running = x.Value.Running,
-                    Started = x.Value.Started.ToString("yyyy-MM-dd HH:mm:ss"),
-                    Finished = x.Value.Finished.ToString("yyyy-MM-dd HH:mm:ss")
-                })
+
             };
 
             return Ok(response);

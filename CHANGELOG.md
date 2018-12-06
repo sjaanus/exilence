@@ -1,7 +1,31 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
-## [0.8.0] - 2018-12-XX
+## [0.8.4] - 2018-12-XX
+- Added option to include/exclude low confidence prices (excluded by default)
+- Reformatted timestamps for net worth graph
+- Changed the default stashtab-selection to the 10 first tabs, up from 5
+- Style-tweaks to disconnected-page
+- Improved tutorial-tooltips
+
+## [0.8.3] - 2018-12-06
+- Added a direct restart-link to updatenotification-toolbar
+- Added initial support for veiledmods
+- Added pricing for fossiles and resonators
+- Reworked how the API stores leagues with ladders
+- Fixed a bug where export-button was visible even when you were not selected
+- Removed .NET Core sessions from API (to optimize requests)
+
+## [0.8.2] - 2018-12-04
+- Hotfix for messaging not being sent to party
+
+## [0.8.1] - 2018-12-03
+- Fixed net worth overlay (should now update properly)
+- Fixed macros (should now show correct values)
+- Improved formatting of net worth timestamps
+- Rewrote functionality of how connections are handles to reduce API load
+
+## [0.8.0] - 2018-12-03
 - Renamed the app to Exilence (former ExileParty)
 - Improved performance for players with large area-history
 - Improved ladder-functionality

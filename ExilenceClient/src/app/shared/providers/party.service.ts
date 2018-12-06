@@ -22,6 +22,7 @@ import { MessageValueService } from './message-value.service';
 import { ExtendedAreaInfo } from '../interfaces/area.interface';
 import { HistoryHelper } from '../helpers/history.helper';
 import { LeagueWithPlayers } from '../interfaces/league.interface';
+import { LadderService } from './ladder.service';
 
 @Injectable()
 export class PartyService {
@@ -108,12 +109,12 @@ export class PartyService {
 
           // set initial values for party net worth
           let networth = 0;
-          this.messageValueService.partyGain = 0;
+          this.messageValueService.partyGainSubject.next(0);
           this.party.players.forEach(p => {
             this.updatePartyGain(p);
             networth = networth + p.netWorthSnapshots[0].value;
           });
-          this.messageValueService.partyValue = networth;
+          this.messageValueService.partyValueSubject.next(networth);
 
         });
       });

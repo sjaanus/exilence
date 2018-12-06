@@ -23,7 +23,7 @@ namespace Exilence
             WebHost.CreateDefaultBuilder(args)
                 .UseKestrel(options =>
                 {
-                    options.Listen(IPAddress.Any, 80);
+                    options.Listen(IPAddress.Loopback, 5678);
                 })
                 .ConfigureLogging((hostingContext, builder) =>
                 {
@@ -33,15 +33,16 @@ namespace Exilence
                         if (
                         logLevel == LogLevel.Trace ||
                         logLevel == LogLevel.Debug ||
-                        category == "Hangfire.BackgroundJobServer" ||
-                        category == " Hangfire.Processing.BackgroundExecution" || 
-                        category == "Hangfire.Server.BackgroundServerProcess")
+                        logLevel == LogLevel.Information
+                        )
                         {
                             return false;
                         }
 
                         return true;
                     });
+
+
                     builder.AddFile("Logs/Exilence-{Date}.txt");
                 })
                 .UseStartup<Startup>();

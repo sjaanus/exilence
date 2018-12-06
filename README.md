@@ -11,14 +11,15 @@ Report bugs at https://github.com/viktorgullmark/exilence/issues
 
 Communicate with us at our Discord https://discord.gg/ymr3VnA
 
-## Screenshots from 0.5.4b
+## Video-preview
 
-https://imgur.com/a/cpODf7I
+https://www.youtube.com/watch?v=3YdWM2kS4BA&t=2s
 
 ## Contents
 
 - [Changelog](https://github.com/viktorgullmark/exilence/blob/master/CHANGELOG.md)
 - [Important](#important)
+- [How to install](#how-to-install)
 - [Platform](#platform)
 - [Help with development](#help-with-development)
 - [Acknowledgements](#acknowledgements)
@@ -26,6 +27,10 @@ https://imgur.com/a/cpODf7I
 ## Important
 
 We do not own a code-signing certificate for the application, which means you will receive a warning the first time you launch the .exe. To get around this, just press "More info" -> "Run anyway" when it pops up, and the warning won't be displayed for you again.
+
+## How to install
+
+https://imgur.com/a/cBibtoF
 
 ## Platform
 

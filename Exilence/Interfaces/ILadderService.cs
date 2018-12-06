@@ -14,6 +14,6 @@ namespace Exilence.Interfaces
         List<LadderPlayerModel> GetSoloDepthLadderForPlayer(string league, string character);
         List<LadderPlayerModel> GetGroupDepthLadderForPlayer(string league, string character);
         List<LadderPlayerModel> GetLadderForLeague(string league, bool full = false);
-        void UpdateLadders();
+        Task UpdateLadders();
     }
 }

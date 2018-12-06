@@ -1,9 +1,6 @@
 ﻿using Exilence.Interfaces;
 using Microsoft.Extensions.Logging;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 
@@ -11,44 +8,29 @@ namespace Exilence.Services
 {
     public class ExternalService : IExternalService
     {
-
         private readonly ILogger<ExternalService> _log;
-        
-        //private bool _rateLimited;
+        private readonly HttpClient _httpClient;
 
-        public ExternalService(ILogger<ExternalService> log)
+        public ExternalService(ILogger<ExternalService> log, HttpClient httpClient)
         {
             _log = log;
+            _httpClient = httpClient;
         }
 
         public async Task<string> ExecuteGetAsync(string url)
         {
-            var handler = new HttpClientHandler() { AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate, UseCookies = false, UseDefaultCredentials = false };
             try
             {
-                using (var client = new HttpClient(handler))
+                HttpResponseMessage res = await _httpClient.GetAsync(url);
+                
+                if (res.IsSuccessStatusCode)
                 {
-                    client.Timeout = TimeSpan.FromSeconds(15);
+                    HttpContent content = res.Content;
 
-                    using (HttpResponseMessage res = await client.GetAsync(url))
-                    {
-                        if (res.IsSuccessStatusCode)
-                        {
-                            using (HttpContent content = res.Content)
-                            {
-                                return await content.ReadAsStringAsync();
-                            }
-                        }
-                        //else
-                        //{
-                        //    _log.LogError($"Response Error: {res.ReasonPhrase}");
-                        //    if (res.StatusCode == HttpStatusCode.TooManyRequests)
-                        //    {
-                        //    }
-                        //}
-                        return null;
-                    }
+                    return await content.ReadAsStringAsync();
                 }
+
+                return null;
             }
             catch (Exception e)
             {

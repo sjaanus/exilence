@@ -1,6 +1,8 @@
 export enum NinjaTypes {
     CURRENCY = 'Currency',
     FRAGMENT = 'Fragment',
+    FOSSILS = 'Fossil',
+    RESONATORS = 'Resonator',
     ESSENCE = 'Essence',
     DIVINATION_CARD = 'DivinationCard',
     PROPHECY = 'Prophecy',
@@ -68,6 +70,8 @@ export interface NinjaLine {
     chaosValue?: number;
     exaltedValue?: number;
     links?: number;
+    receive?: any;
+    pay?: any;
 }
 
 export interface NinjaCurrencyDetail {

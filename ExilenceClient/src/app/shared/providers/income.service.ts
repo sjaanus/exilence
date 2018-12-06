@@ -41,6 +41,8 @@ export class IncomeService {
   private fiveMinutes = 5 * 60 * 1000;
   private sessionIdValid = false;
 
+  private lowConfidencePricing = false;
+
   constructor(
     private ninjaService: NinjaService,
     private accountService: AccountService,
@@ -220,44 +222,69 @@ export class IncomeService {
       this.lastNinjaHit = Date.now();
       this.ninjaPrices = [];
 
+      const setting = this.settingsService.get('lowConfidencePricing');
+      if (setting !== undefined) {
+        this.lowConfidencePricing = setting;
+      }
+
       const enumTypes = Object.values(NinjaTypes);
       return Observable
         .from(enumTypes)
         .concatMap(type => this.ninjaService.getFromNinja(league, type)
           .delay(750))
         .do(typeResponse => {
-          typeResponse.lines.forEach((line: NinjaLine) => {
+          if (typeResponse !== null) {
+            typeResponse.lines.forEach((line: NinjaLine) => {
 
-            // Filter each line here, probably needs improvement
-            // But the response differse for Currency & Fragments hence the if's
-
-            let links = 0;
-            let value = 0;
-            let name = '';
-
-            if ('chaosEquivalent' in line) {
-              value = line.chaosEquivalent;
-            }
-            if ('chaosValue' in line) {
-              value = line.chaosValue;
-            }
-            if ('currencyTypeName' in line) {
-              name = line.currencyTypeName;
-            }
-            if ('name' in line) {
-              name = line.name;
-              if (line.baseType && (line.name.indexOf(line.baseType) === -1)) {
-                name += ' ' + line.baseType;
+              // Exclude low-confidence prices
+              if (!this.lowConfidencePricing) {
+                const receive = line.receive;
+                const pay = line.pay;
+                if (receive !== undefined && receive !== null) {
+                  if (receive.count < 5) {
+                    return;
+                  }
+                }
+                if (pay !== undefined && pay !== null) {
+                  if (pay.count < 5) {
+                    return;
+                  }
+                }
               }
-              name.trim();
-            }
-            if ('links' in line) {
-              links = line.links;
-            }
-            if (links === 0 && name !== '') {
-              this.ninjaPrices[name] = value;
-            }
-          });
+
+              // Filter each line here, probably needs improvement
+              // But the response differse for Currency & Fragments hence the if's
+
+              let links = 0;
+              let value = 0;
+              let name = '';
+
+              if ('chaosEquivalent' in line) {
+                value = line.chaosEquivalent;
+              }
+              if ('chaosValue' in line) {
+                value = line.chaosValue;
+              }
+              if ('currencyTypeName' in line) {
+                name = line.currencyTypeName;
+              }
+              if ('name' in line) {
+                name = line.name;
+                if (line.baseType && (line.name.indexOf(line.baseType) === -1)) {
+                  name += ' ' + line.baseType;
+                }
+                name.trim();
+              }
+              if ('links' in line) {
+                links = line.links;
+              }
+              if (links === 0 && name !== '') {
+                this.ninjaPrices[name] = value;
+              }
+            });
+          } else {
+            this.isSnapshotting = false;
+          }
         });
     }
   }
