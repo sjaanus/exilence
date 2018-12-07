@@ -77,7 +77,7 @@ namespace Exilence.Services
             return null;
         }
 
-        public async Task<List<LadderPlayerModel>> GetLadderForPlayer(string leagueName, string character)
+        public async Task<LadderModel> GetLadder(string leagueName, string character)
         {
             var league = await _redisRepository.GetLeagueLadder(leagueName);
             if (league == null)
@@ -86,27 +86,91 @@ namespace Exilence.Services
             }
             else
             {
-                LadderPlayerModel characterOnLadder = null;
                 if (league.Ladder != null)
                 {
-                    characterOnLadder = league.Ladder.FirstOrDefault(t => t.Name == character);
-                }
+                    var ladderCharacter = league.Ladder.FirstOrDefault(t => t.Name == character);
+                    if (ladderCharacter != null)
+                    {
+                        var ladder = GetLadderForCharacter(league, ladderCharacter);
+                        var classLadder = GetClassLadderForCharacter(league, ladderCharacter);
+                        var groupLadder = GetGroupDepthLadderForCharacter(league, ladderCharacter);
+                        var soloLadder = GetSoloDepthLadderForCharacter(league, ladderCharacter);
 
-                if (characterOnLadder != null)
-                {
-                    var index = league.Ladder.IndexOf(characterOnLadder);
-                    var before = league.Ladder.Where(t => t.Rank.Overall < characterOnLadder.Rank.Overall && t.Rank.Overall >= (characterOnLadder.Rank.Overall - 5));
-                    var after = league.Ladder.Where(t => t.Rank.Overall > characterOnLadder.Rank.Overall && t.Rank.Overall <= (characterOnLadder.Rank.Overall + 5));
+                        var ladderModel = new LadderModel()
+                        {
+                            OverallLadder = ladder,
+                            ClassLadder = classLadder,
+                            DepthGroupLadder = groupLadder,
+                            DepthSoloLadder = soloLadder
+                        };
+                        return ladderModel;
 
-                    var ladderList = new List<LadderPlayerModel>();
-                    ladderList.AddRange(before);
-                    ladderList.AddRange(after);
-                    ladderList.Add(characterOnLadder);
-                    return ladderList.OrderBy(t => t.Rank.Overall).ToList();
+                    }
                 }
             }
-
             return null;
+        }
+
+
+        private List<LadderPlayerModel> GetLadderForCharacter(LadderStoreModel league, LadderPlayerModel character)
+        {
+            if (character != null)
+            {
+                var index = league.Ladder.IndexOf(character);
+                return GetPartOfLadder(index - 5, index + 5, league.Ladder);
+            }
+            return null;
+        }
+
+        private List<LadderPlayerModel> GetClassLadderForCharacter(LadderStoreModel league, LadderPlayerModel character)
+        {
+            if (character != null)
+            {
+                var leagueLadder = league.Ladder
+                       .Where(t => t.Class == character.Class)
+                       .OrderBy(t => t.Rank.Class)
+                       .ToList();
+
+                var index = leagueLadder.IndexOf(character);
+                return GetPartOfLadder(index - 5, index + 5, leagueLadder);
+            }
+            return null;
+        }
+
+        private List<LadderPlayerModel> GetGroupDepthLadderForCharacter(LadderStoreModel league, LadderPlayerModel character)
+        {
+            if (character != null)
+            {
+                var leagueLadder = league.Ladder.OrderByDescending(t => t.Depth.Group).ToList();
+                var index = leagueLadder.IndexOf(character);
+                return GetPartOfLadder(index - 5, index + 5, leagueLadder);
+            }
+            return null;
+        }
+
+        private List<LadderPlayerModel> GetSoloDepthLadderForCharacter(LadderStoreModel league, LadderPlayerModel character)
+        {
+            if (character != null)
+            {
+                var leagueLadder = league.Ladder.OrderByDescending(t => t.Depth.Solo).ToList();
+                var index = leagueLadder.IndexOf(character);
+                return GetPartOfLadder(index - 5, index + 5, leagueLadder);
+            }
+            return null;
+        }
+
+        private List<LadderPlayerModel> GetPartOfLadder(int from, int to, List<LadderPlayerModel> ladder)
+        {
+            var result = new List<LadderPlayerModel>();
+            for (int i = from; i <= to; i++)
+            {
+                var element = ladder.ElementAtOrDefault(i);
+                if (element != null)
+                {
+                    result.Add(element);
+                }
+            }
+            return result;
         }
 
         public async Task UpdateLadders()

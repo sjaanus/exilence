@@ -36,7 +36,7 @@ namespace Exilence.Controllers
         [Route("character")]
         public async Task<IActionResult> Index(string league, string character)
         {
-            var list = await _ladderService.GetLadderForPlayer(league, character);
+            var list = await _ladderService.GetLadder(league, character);
             return Ok(new { Ladder = list });
         }
 
