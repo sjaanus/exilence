@@ -1,9 +1,10 @@
 import { NgModule } from '@angular/core';
-import { CharLadderComponent } from './char-ladder.component';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { MatIconModule, MatInputModule, MatTabsModule } from '@angular/material';
+
 import { SharedModule } from '../../../../shared/shared.module';
 import { LadderTableModule } from '../../ladder-table/ladder-table.module';
-import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { MatInputModule } from '@angular/material';
+import { CharLadderComponent } from './char-ladder.component';
 
 @NgModule({
   imports: [
@@ -11,7 +12,9 @@ import { MatInputModule } from '@angular/material';
     LadderTableModule,
     FormsModule,
     ReactiveFormsModule,
-    MatInputModule
+    MatInputModule,
+    MatTabsModule,
+    MatIconModule
   ],
   declarations: [CharLadderComponent],
   exports: [CharLadderComponent]

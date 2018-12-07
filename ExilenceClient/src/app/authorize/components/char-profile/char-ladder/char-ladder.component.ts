@@ -17,10 +17,7 @@ export class CharLadderComponent implements OnInit {
   form: FormGroup;
   @Input() player: Player;
 
-  averageTimeSpent = '';
-  filteredArr = [];
-
-  private oneHourAgo = (Date.now() - (1 * 60 * 60 * 1000));
+  selectedIndex = 0;
 
   @ViewChild('table') table: LadderTableComponent;
 
@@ -34,13 +31,24 @@ export class CharLadderComponent implements OnInit {
     this.form = fb.group({
       searchText: ['']
     });
-    this.partyService.selectedPlayer.subscribe(res => {
-      this.player = res;
-    });
   }
 
   ngOnInit() {
     this.analyticsService.sendScreenview('/authorized/party/player/ladder');
+
+    this.partyService.selectedPlayer.subscribe(res => {
+
+      if (res !== undefined && res !== null) {
+        this.player = res;
+
+        // todo: update each ladder
+        this.table.dataSource = [];
+        if (res.ladderInfo !== null && res.ladderInfo !== undefined) {
+          this.table.updateTable(res.ladderInfo.ladder);
+        }
+        this.table.init();
+      }
+    });
   }
   openLink(link: string) {
     this.electronService.shell.openExternal(link);
