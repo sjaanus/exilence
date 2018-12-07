@@ -31,13 +31,24 @@ export class CharLadderComponent implements OnInit {
     this.form = fb.group({
       searchText: ['']
     });
-    this.partyService.selectedPlayer.subscribe(res => {
-      this.player = res;
-    });
   }
 
   ngOnInit() {
     this.analyticsService.sendScreenview('/authorized/party/player/ladder');
+
+    this.partyService.selectedPlayer.subscribe(res => {
+
+      if (res !== undefined && res !== null) {
+        this.player = res;
+
+        // todo: update each ladder
+        this.table.dataSource = [];
+        if (res.ladderInfo !== null && res.ladderInfo !== undefined) {
+          this.table.updateTable(res.ladderInfo.ladder);
+        }
+        this.table.init();
+      }
+    });
   }
   openLink(link: string) {
     this.electronService.shell.openExternal(link);

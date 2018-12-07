@@ -12,6 +12,7 @@ import { PartyService } from '../../../shared/providers/party.service';
 })
 export class LadderTableComponent implements OnInit {
   @Input() player: Player;
+  @Input() ladder: LadderPlayer[];
   displayedColumns: string[] = ['online', 'rank', 'level', 'character', 'account', 'experience_per_hour'];
   dataSource = [];
   filteredArr = [];
@@ -21,16 +22,9 @@ export class LadderTableComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.updateTable(this.player.ladderInfo);
+    this.updateTable(this.ladder);
     this.partyService.selectedPlayer.subscribe(res => {
-      if (res !== undefined && res !== null) {
-        this.player = res;
-        this.dataSource = [];
-        if (res.ladderInfo !== null && res.ladderInfo !== undefined) {
-          this.updateTable(res.ladderInfo);
-        }
-        this.init();
-      }
+      this.player = res;
     });
   }
 
