@@ -1,16 +1,17 @@
-import { Component, OnInit, AfterViewChecked, AfterViewInit, OnDestroy } from '@angular/core';
+import { AfterViewInit, Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { MatDialog } from '@angular/material';
 import { Router } from '@angular/router';
+import { Subscription } from 'rxjs/internal/Subscription';
 
 import { Player } from '../../shared/interfaces/player.interface';
 import { AccountService } from '../../shared/providers/account.service';
 import { AnalyticsService } from '../../shared/providers/analytics.service';
 import { ElectronService } from '../../shared/providers/electron.service';
-import { PartyService } from '../../shared/providers/party.service';
-import { InfoDialogComponent } from '../components/info-dialog/info-dialog.component';
-import { MatDialog } from '@angular/material';
-import { SettingsService } from '../../shared/providers/settings.service';
-import { Subscription } from 'rxjs/internal/Subscription';
 import { IncomeService } from '../../shared/providers/income.service';
+import { PartyService } from '../../shared/providers/party.service';
+import { SettingsService } from '../../shared/providers/settings.service';
+import { InfoDialogComponent } from '../components/info-dialog/info-dialog.component';
+import { ItemContextMenuComponent } from '../components/item-context-menu/item-context-menu.component';
 
 @Component({
   selector: 'app-dashboard',
@@ -25,6 +26,10 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
   player: Player;
   private count = 0;
   private playerSub: Subscription;
+
+
+  @ViewChild('contextmenu') contextMenu: ItemContextMenuComponent;
+
   constructor(
     private electronService: ElectronService,
     private partyService: PartyService,
@@ -50,6 +55,14 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
     setTimeout(() => {
       this.isLoading = false;
     }, 2000);
+  }
+
+  openContextMenu() {
+    this.contextMenu.openContextMenu();
+  }
+
+  menuClicked(event) {
+    console.log(event);
   }
 
   checkMask(partyName: string, index: number) {

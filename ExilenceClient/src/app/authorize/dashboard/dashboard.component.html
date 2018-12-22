@@ -15,6 +15,10 @@
             </div>
         </div>
     </div>
+
+    <div (contextmenu)="openContextMenu()">TEST</div>
+    <app-item-context-menu #contextmenu [text]="'Click me!'" [item]="{'some':'object'}" (clicked)="menuClicked($event)"></app-item-context-menu>
+
     <h3 class="mat-h3">Changelog</h3>
     <p class="mat-body-1">
         To see whats new in this version, please go to <a class="inline-link" (click)="openLink('https://github.com/viktorgullmark/exilence/blob/master/CHANGELOG.md')">this

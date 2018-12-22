@@ -1,17 +1,27 @@
-import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
-import { MatButtonModule, MatInputModule, MatOptionModule, MatSelectModule, MatIconModule,
-  MatStepperModule, MatProgressBarModule, MatCheckboxModule, MatRadioModule, MatDividerModule, MatGridListModule } from '@angular/material';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import {
+  MatButtonModule,
+  MatCheckboxModule,
+  MatDividerModule,
+  MatGridListModule,
+  MatIconModule,
+  MatInputModule,
+  MatOptionModule,
+  MatProgressBarModule,
+  MatRadioModule,
+  MatSelectModule,
+  MatStepperModule,
+} from '@angular/material';
 import { MatFormFieldModule } from '@angular/material/form-field';
 
-import { LoginComponent } from './login.component';
-import { SharedModule } from '../shared/shared.module';
-import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { ClearHistoryDialogModule } from '../shared/components/clear-history-dialog/clear-history-dialog.module';
-import { ClearHistoryDialogComponent } from '../shared/components/clear-history-dialog/clear-history-dialog.component';
 import { InfoDialogComponent } from '../authorize/components/info-dialog/info-dialog.component';
 import { InfoDialogModule } from '../authorize/components/info-dialog/info-dialog.module';
 import { ItemContextMenuModule } from '../authorize/components/item-context-menu/item-context-menu.module';
+import { ClearHistoryDialogComponent } from '../shared/components/clear-history-dialog/clear-history-dialog.component';
+import { ClearHistoryDialogModule } from '../shared/components/clear-history-dialog/clear-history-dialog.module';
+import { SharedModule } from '../shared/shared.module';
+import { LoginComponent } from './login.component';
 
 @NgModule({
   imports: [
@@ -31,8 +41,7 @@ import { ItemContextMenuModule } from '../authorize/components/item-context-menu
     InfoDialogModule,
     ClearHistoryDialogModule,
     MatDividerModule,
-    MatGridListModule
-    LeagueChangedDialogModule,
+    MatGridListModule,
     ItemContextMenuModule
   ],
   declarations: [LoginComponent],
