@@ -1,16 +1,15 @@
-import { Component, Inject, OnInit, ViewChild } from '@angular/core';
+import { Component, Inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatDialog, MatStep, MatStepper } from '@angular/material';
 import { Router } from '@angular/router';
-import { forkJoin } from 'rxjs';
+import { forkJoin, Subscription } from 'rxjs';
 
 import { InfoDialogComponent } from '../authorize/components/info-dialog/info-dialog.component';
-import { LeagueChangedDialogComponent } from '../shared/components/league-changed-dialog/league-changed-dialog.component';
+import { ClearHistoryDialogComponent } from '../shared/components/clear-history-dialog/clear-history-dialog.component';
 import { HistoryHelper } from '../shared/helpers/history.helper';
 import { AccountInfo } from '../shared/interfaces/account-info.interface';
 import { ExtendedAreaInfo } from '../shared/interfaces/area.interface';
 import { Character } from '../shared/interfaces/character.interface';
-import { EquipmentResponse } from '../shared/interfaces/equipment-response.interface';
 import { NetWorthHistory } from '../shared/interfaces/income.interface';
 import { League } from '../shared/interfaces/league.interface';
 import { Player } from '../shared/interfaces/player.interface';
@@ -18,7 +17,6 @@ import { AccountService } from '../shared/providers/account.service';
 import { AnalyticsService } from '../shared/providers/analytics.service';
 import { ElectronService } from '../shared/providers/electron.service';
 import { ExternalService } from '../shared/providers/external.service';
-import { LadderService } from '../shared/providers/ladder.service';
 import { LogMonitorService } from '../shared/providers/log-monitor.service';
 import { MapService } from '../shared/providers/map.service';
 import { SessionService } from '../shared/providers/session.service';
@@ -30,7 +28,7 @@ import { ItemContextMenuComponent } from '../authorize/components/item-context-m
     templateUrl: './login.component.html',
     styleUrls: ['./login.component.scss']
 })
-export class LoginComponent implements OnInit {
+export class LoginComponent implements OnInit, OnDestroy {
     accFormGroup: FormGroup;
     leagueFormGroup: FormGroup;
     sessFormGroup: FormGroup;
@@ -60,8 +58,11 @@ export class LoginComponent implements OnInit {
     areaHistory: ExtendedAreaInfo[];
     form: any;
     needsValidation: boolean;
+    leagueChanged = false;
+    shouldSetup = true;
 
-    private twelveHoursAgo = (Date.now() - (12 * 60 * 60 * 1000));
+    leaguesSub: Subscription;
+    characterListSub: Subscription;
 
     @ViewChild('stepper') stepper: MatStepper;
     @ViewChild('lastStep') lastStep: MatStep;
@@ -71,15 +72,14 @@ export class LoginComponent implements OnInit {
         private externalService: ExternalService,
         private electronService: ElectronService,
         private accountService: AccountService,
-        private sessionService: SessionService,
+        public sessionService: SessionService,
         private settingsService: SettingsService,
         private analyticsService: AnalyticsService,
-        private ladderService: LadderService,
         public logMonitorService: LogMonitorService,
         private mapService: MapService,
         private dialog: MatDialog
     ) {
-        this.externalService.leagues.subscribe((res: League[]) => {
+        this.leaguesSub = this.externalService.leagues.subscribe((res: League[]) => {
             this.leagues = res;
         });
 
@@ -99,8 +99,7 @@ export class LoginComponent implements OnInit {
             characterName: [this.characterName !== undefined ? this.characterName : '', Validators.required]
         });
         this.pathFormGroup = fb.group({
-            filePath: [this.filePath !== undefined ? this.filePath :
-                'C:/Program Files (x86)/Steam/steamapps/common/Path of Exile/logs/Client.txt', Validators.required]
+            filePath: [this.filePath !== undefined ? this.filePath : '', Validators.required]
         });
 
         this.parsingEnabled = this.parsingEnabled !== undefined ? this.parsingEnabled : false;
@@ -116,6 +115,15 @@ export class LoginComponent implements OnInit {
     checkPath() {
         this.pathValid = this.electronService.fs.existsSync(this.pathFormGroup.controls.filePath.value)
             && this.pathFormGroup.controls.filePath.value.toLowerCase().endsWith('client.txt');
+    }
+
+    ngOnDestroy() {
+        if (this.leaguesSub !== undefined) {
+            this.leaguesSub.unsubscribe();
+        }
+        if (this.characterListSub !== undefined) {
+            this.characterListSub.unsubscribe();
+        }
     }
 
     parseLog() {
@@ -190,8 +198,21 @@ export class LoginComponent implements OnInit {
     }
 
     ngOnInit() {
+        // temporary clearing of settings if delve is still set
+        if (this.leagueName === 'Delve' ||
+            this.leagueName === 'Hardcore Delve' ||
+            this.leagueName === 'SSF Delve HC' ||
+            this.leagueName === 'SSF Delve' ||
+            this.tradeLeagueName === 'Delve' ||
+            this.tradeLeagueName === 'Hardcore Delve' ||
+            this.tradeLeagueName === 'SSF Delve HC' ||
+            this.tradeLeagueName === 'SSF Delve') {
+            this.settingsService.deleteAll();
+            this.stepper.selectedIndex = 0;
+        }
+
         this.accountService.loggingIn = true;
-        this.accountService.characterList.subscribe(res => {
+        this.characterListSub = this.accountService.characterList.subscribe(res => {
             if (res !== undefined) {
                 this.characterList = res;
             }
@@ -213,9 +234,11 @@ export class LoginComponent implements OnInit {
             this.netWorthHistory !== undefined &&
             this.areaHistory !== undefined) {
 
-            for (let i = 0; i < 6; i++) {
-                this.stepper.selectedIndex = i;
-            }
+            this.shouldSetup = false;
+
+            // for (let i = 0; i < 6; i++) {
+            //     this.stepper.selectedIndex = i;
+            // }
 
             this.getLeagues(undefined, false);
             this.getCharacterList(undefined, false);
@@ -224,6 +247,10 @@ export class LoginComponent implements OnInit {
                 this.parseLog();
             }
         }
+    }
+
+    initSetup() {
+        this.shouldSetup = true;
     }
 
     setSessionCookie(sessionId: string) {
@@ -345,15 +372,17 @@ export class LoginComponent implements OnInit {
                 && (this.settingsService.get('lastLeague') !== this.leagueFormGroup.controls.leagueName.value)
                 ||
                 (this.settingsService.get('account.tradeLeagueName') !== undefined
-                    && this.settingsService.get('account.tradeLeagueName') !== this.leagueFormGroup.controls.tradeLeagueName.value))) {
-            // league changed since last log-in
-            const dialogRef = this.dialog.open(LeagueChangedDialogComponent, {
+                    && this.settingsService.get('account.tradeLeagueName') !== this.leagueFormGroup.controls.tradeLeagueName.value)
+                || (this.settingsService.get('account.characterName') !== undefined
+                    && this.settingsService.get('account.characterName') !== this.charFormGroup.controls.characterName.value))) {
+            // league or character changed since last log-in
+            const dialogRef = this.dialog.open(ClearHistoryDialogComponent, {
                 width: '650px',
                 data: {
                     icon: 'swap_horiz',
-                    title: 'League changed',
+                    title: 'League and/or character changed',
                     // tslint:disable-next-line:max-line-length
-                    content: 'We detected that you changed league-settings since your last login. Please note that your networth and area history will be mixed between leagues if you continue without clearing the history.<br/><br/>' +
+                    content: 'We detected that you changed league or character since your last login. Please note that your networth and area history will be mixed between the sessions if you continue without clearing the history.<br/><br/>' +
                         'Do you want to clear the history?'
                 }
             });
@@ -372,13 +401,16 @@ export class LoginComponent implements OnInit {
         this.isLoading = true;
         this.form = this.getFormObj();
         this.analyticsService.startTracking(this.form.accountName);
-        this.externalService.getCharacter(this.form)
-            .subscribe((data: EquipmentResponse) => {
 
-                const player = this.externalService.setCharacter(data, this.player);
-                this.player = player;
-                this.completeLogin();
-            });
+        const request = forkJoin(
+            this.externalService.getCharacter(this.form),
+        );
+
+        request.subscribe(res => {
+            const player = this.externalService.setCharacter(res[0], this.player);
+            this.player = player;
+            this.completeLogin();
+        });
     }
 
     validateSessionId() {
@@ -421,10 +453,10 @@ export class LoginComponent implements OnInit {
         this.player.account = this.form.accountName;
         this.player.netWorthSnapshots = this.netWorthHistory.history;
 
-        const oneHourAgo = (Date.now() - (1 * 60 * 60 * 1000));
+        const oneDayAgo = (Date.now() - (24 * 60 * 60 * 1000));
 
         this.mapService.updateLocalPlayerAreas(this.areaHistory);
-        this.player.pastAreas = HistoryHelper.filterAreas(this.areaHistory, oneHourAgo);
+        this.player.pastAreas = HistoryHelper.filterAreas(this.areaHistory, oneDayAgo);
 
         this.externalService.validateSessionId(
             this.form.sessionId,
@@ -447,12 +479,13 @@ export class LoginComponent implements OnInit {
 
             this.accountService.loggingIn = false;
 
+            this.sessionService.completedLogin = true;
+
             this.settingsService.set('account', this.form);
             this.settingsService.set('trackMapsOnly', this.logMonitorService.trackMapsOnly);
             this.sessionService.initSession(this.form.sessionId);
             this.isLoading = false;
             this.settingsService.set('lastLeague', this.leagueFormGroup.controls.leagueName.value);
-            this.ladderService.startPollingLadder();
             this.router.navigate(['/authorized/dashboard']);
         });
     }

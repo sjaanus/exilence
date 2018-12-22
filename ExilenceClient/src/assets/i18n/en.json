@@ -26,12 +26,15 @@
         "SHOW": "Show graph",
         "HIDE": "Hide graph",
         "RESET": "Clear history",
-        "REPORT": "Send net worth report",
-        "POPOUT": "Pop out"
+        "REPORT": "Net worth Report",
+        "POPOUT": "Use overlay"
     },
     "ROBOT": {
-        "GAME": "Game",
-        "CLIPBOARD": "Clipboard"
+        "GAME": "To Game",
+        "CLIPBOARD": "To Clipboard"
+    },
+    "NETWORTH": {
+        "FULL_SOLO_REPORT": "Full Export"
     },
     "NOTIFICATION": {
         "UPDATE_AVAILABLE": "There is a new version of Exilence available."
@@ -75,7 +78,7 @@
     },
     "ERROR": {
         "PATH_NOT_VALID": "The filepath is not valid",
-        "SESSIONID_NOT_VALID": "The sessionId is not valid",
+        "SESSIONID_NOT_VALID": "The sessionId or accountname is not valid",
         "SESSIONID_NOT_VALIDATED": "The sessionId has not been validated yet",
         "SESSIONID_NOT_PROVIDED": "No sessionId provided",
         "PRIVATE_PROFILE": "This account is set to private, a sessionId is required to continue"

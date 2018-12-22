@@ -18,12 +18,26 @@ html, body {
     font-size: 15px;
 }
 
+.full-width {
+    width: 100%;
+}
+
+.half-width {
+    width: 50%;
+}
+
 text {
     font-size: 10px !important;
 }
 
 .external-link {
     color: $external-link-color;
+}
+
+.summary-chart { 
+  .chart-legend .legend-labels {
+    width: 300px !important;
+  }
 }
 
 @keyframes fadein {
@@ -130,6 +144,9 @@ a {
 
     &.login-form {
         width: 60%;
+    }
+    &.welcome-back-screen {
+        width: 50%;
     }
 
     .form-error {
