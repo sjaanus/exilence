@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
 import * as signalR from '@aspnet/signalr';
 import { HubConnection } from '@aspnet/signalr';
@@ -22,10 +22,11 @@ import { MessageValueService } from './message-value.service';
 import { ExtendedAreaInfo } from '../interfaces/area.interface';
 import { HistoryHelper } from '../helpers/history.helper';
 import { LeagueWithPlayers } from '../interfaces/league.interface';
-import { LadderService } from './ladder.service';
+import { Subscription } from 'rxjs';
+import { ServerMessage } from '../interfaces/server-message.interface';
 
 @Injectable()
-export class PartyService {
+export class PartyService implements OnDestroy {
   public _hubConnection: HubConnection | undefined;
   public async: any;
   public party: Party;
@@ -47,9 +48,21 @@ export class PartyService {
   public playerLeagues: BehaviorSubject<LeagueWithPlayers[]> = new BehaviorSubject<LeagueWithPlayers[]>([]);
   public genericPlayers: BehaviorSubject<Player[]> = new BehaviorSubject<Player[]>([]);
 
+  public serverMessageReceived: BehaviorSubject<ServerMessage> = new BehaviorSubject<ServerMessage>(undefined);
+
   private reconnectAttempts: number;
   private forceClosed: boolean;
 
+  public maskedName = false;
+  public currentPlayerGain;
+  public playerGain;
+  public partyGain = 0;
+  private playerSub: Subscription;
+  private selectedPlayerSub: Subscription;
+  private selectedGenPlayerSub: Subscription;
+  private accountInfoSub: Subscription;
+  private currentPlayerGainSub: Subscription;
+  private playerGainSub: Subscription;
   constructor(
     private router: Router,
     private accountService: AccountService,
@@ -58,24 +71,32 @@ export class PartyService {
     private settingService: SettingsService,
     private logService: LogService,
     private electronService: ElectronService,
-    private messageValueService: MessageValueService
+    private messageValueService: MessageValueService,
+    private settingsService: SettingsService
   ) {
-
     this.reconnectAttempts = 0;
     this.forceClosed = false;
 
     this.recentParties.next(this.settingService.get('recentParties') || []);
 
-    this.accountService.player.subscribe(res => {
+    this.maskedName = this.settingsService.get('maskedGroupname') === true ? true : false;
+
+    this.playerSub = this.accountService.player.subscribe(res => {
       this.currentPlayer = res;
     });
-    this.selectedPlayer.subscribe(res => {
+    this.currentPlayerGainSub = this.messageValueService.currentPlayerGainSubject.subscribe(gain => {
+      this.currentPlayerGain = gain;
+    });
+    this.playerGainSub = this.messageValueService.playerGainSubject.subscribe(gain => {
+      this.playerGain = gain;
+    });
+    this.selectedPlayerSub = this.selectedPlayer.subscribe(res => {
       this.selectedPlayerObj = res;
     });
-    this.selectedGenericPlayer.subscribe(res => {
+    this.selectedGenPlayerSub = this.selectedGenericPlayer.subscribe(res => {
       this.selectedGenericPlayerObj = res;
     });
-    this.accountService.accountInfo.subscribe(res => {
+    this.accountInfoSub = this.accountService.accountInfo.subscribe(res => {
       this.accountInfo = res;
     });
     this.initParty();
@@ -98,7 +119,6 @@ export class PartyService {
           const playerObj = Object.assign({}, player);
           if (playerObj.account === this.currentPlayer.account) {
             playerObj.netWorthSnapshots = Object.assign([], this.currentPlayer.netWorthSnapshots);
-            // playerObj.pastAreas = Object.assign([], this.currentPlayer.pastAreas);
           }
           this.party = party;
           this.updatePlayerLists(this.party);
@@ -110,12 +130,12 @@ export class PartyService {
           // set initial values for party net worth
           let networth = 0;
           this.messageValueService.partyGainSubject.next(0);
+          this.updatePartyGain(this.party.players);
           this.party.players.forEach(p => {
-            this.updatePartyGain(p);
             networth = networth + p.netWorthSnapshots[0].value;
           });
           this.messageValueService.partyValueSubject.next(networth);
-
+          this.messageValueService.partyGainSubject.next(this.partyGain);
         });
       });
     });
@@ -172,6 +192,13 @@ export class PartyService {
       });
     });
 
+    this._hubConnection.on('ServerMessageReceived', (data: ServerMessage) => {
+
+      this.serverMessageReceived.next(data);
+
+      this.logService.log('server message received:', data.body);
+    });
+
     this._hubConnection.on('ForceDisconnect', () => {
       this.disconnect('Recived force disconnect command from server.');
     });
@@ -187,23 +214,79 @@ export class PartyService {
 
   }
 
-  updatePartyGain(player: Player) {
-    const oneHourAgo = (Date.now() - (1 * 60 * 60 * 1000));
+  ngOnDestroy() {
+    console.log('partyservice destroyed');
+    if (this.playerSub !== undefined) {
+      this.playerSub.unsubscribe();
+    } if (this.selectedPlayerSub !== undefined) {
+      this.selectedPlayerSub.unsubscribe();
+    } if (this.selectedGenPlayerSub !== undefined) {
+      this.selectedGenPlayerSub.unsubscribe();
+    } if (this.accountInfoSub !== undefined) {
+      this.accountInfoSub.unsubscribe();
+    } if (this.currentPlayerGainSub !== undefined) {
+      this.currentPlayerGainSub.unsubscribe();
+    } if (this.playerGainSub !== undefined) {
+      this.playerGainSub.unsubscribe();
+    }
+  }
+
+  updatePartyGain(players: Player[]) {
+    this.partyGain = 0;
+    players.forEach(x => {
+      this.updatePartyGainForPlayer(x);
+    });
+  }
+
+  updatePartyGainForPlayer(player: Player) {
+    const gainHours = this.settingsService.get('gainHours');
+    const xHoursAgo = (Date.now() - (gainHours * 60 * 60 * 1000));
     const pastHoursSnapshots = player.netWorthSnapshots
-      .filter((snaphot: NetWorthSnapshot) => snaphot.timestamp > oneHourAgo);
+      .filter((snaphot: NetWorthSnapshot) => snaphot.timestamp > xHoursAgo);
 
     if (pastHoursSnapshots.length > 1) {
       const lastSnapshot = pastHoursSnapshots[0];
       const firstSnapshot = pastHoursSnapshots[pastHoursSnapshots.length - 1];
-      const gainHour = ((1000 * 60 * 60)) / (lastSnapshot.timestamp - firstSnapshot.timestamp) * (lastSnapshot.value - firstSnapshot.value);
-      this.messageValueService.partyGain = this.messageValueService.partyGain + gainHour;
+      const gainHour = (((1000 * 60 * 60)) / (lastSnapshot.timestamp - firstSnapshot.timestamp)
+        * (lastSnapshot.value - firstSnapshot.value)) / gainHours;
+      this.partyGain = this.partyGain + gainHour;
     }
+  }
+
+
+  updatePlayerGain(player: Player, current: boolean) {
+    const gainHours = this.settingsService.get('gainHours');
+    const xHoursAgo = (Date.now() - (gainHours * 60 * 60 * 1000));
+    const pastHoursSnapshots = player.netWorthSnapshots
+      .filter((snaphot: NetWorthSnapshot) => snaphot.timestamp > xHoursAgo);
+
+    if (pastHoursSnapshots.length > 1) {
+      const lastSnapshot = pastHoursSnapshots[0];
+      const firstSnapshot = pastHoursSnapshots[pastHoursSnapshots.length - 1];
+      const gainHour = (((1000 * 60 * 60)) / (lastSnapshot.timestamp - firstSnapshot.timestamp)
+        * (lastSnapshot.value - firstSnapshot.value)) / gainHours;
+      if (current) {
+        this.messageValueService.currentPlayerGainSubject.next(gainHour);
+      } else {
+        this.messageValueService.playerGainSubject.next(gainHour);
+      }
+    } else {
+      if (current) {
+        this.messageValueService.currentPlayerGainSubject.next(0);
+      } else {
+        this.messageValueService.playerGainSubject.next(0);
+      }
+    }
+
   }
 
   initHubConnection() {
     this.logService.log('Starting signalr connection');
     this._hubConnection.start().then(() => {
       console.log('Successfully established signalr connection!');
+      if (this.party !== undefined && this.currentPlayer !== undefined && this.party.name !== '') {
+        this.joinParty(this.party.name, this.currentPlayer);
+      }
       this.reconnectAttempts = 0;
     }).catch((err) => {
       console.error(err.toString());
@@ -229,7 +312,7 @@ export class PartyService {
     this.logService.log(reason, null, true);
     this.accountService.clearCharacterList();
     localStorage.removeItem('sessionId');
-    this.router.navigate(['/disconnected']);
+    this.router.navigate(['/disconnected', false]);
   }
 
   updatePlayerLists(party: Party) {
@@ -250,16 +333,17 @@ export class PartyService {
   }
 
   public updatePlayer(player: Player) {
-    const oneHourAgo = (Date.now() - (1 * 60 * 60 * 1000));
-    const objToSend = Object.assign({}, player);
-    objToSend.pastAreas = HistoryHelper.filterAreas(objToSend.pastAreas, oneHourAgo);
-    objToSend.netWorthSnapshots = HistoryHelper.filterNetworth(objToSend.netWorthSnapshots, oneHourAgo);
+    const oneDayAgo = (Date.now() - (24 * 60 * 60 * 1000));
     this.externalService.getCharacter(this.accountInfo)
       .subscribe((equipment: EquipmentResponse) => {
         player = this.externalService.setCharacter(equipment, player);
+        const objToSend = Object.assign({}, player);
+        objToSend.pastAreas = HistoryHelper.filterAreas(objToSend.pastAreas, oneDayAgo);
+        objToSend.netWorthSnapshots = HistoryHelper.filterNetworth(objToSend.netWorthSnapshots, oneDayAgo);
         if (this._hubConnection) {
-          this.electronService.compress(player, (data) => this._hubConnection.invoke('UpdatePlayer', this.party.name, data).catch((e) => {
-          }));
+          this.electronService.compress(objToSend, (data) => this._hubConnection.invoke('UpdatePlayer', this.party.name, data)
+            .catch((e) => {
+            }));
         }
       });
   }
@@ -277,9 +361,9 @@ export class PartyService {
     this.party.players.push(player);
     this.party.name = partyName;
     if (this._hubConnection) {
-      const oneHourAgo = (Date.now() - (1 * 60 * 60 * 1000));
-      const historyToSend = HistoryHelper.filterNetworth(playerToSend.netWorthSnapshots, oneHourAgo);
-      const areasToSend = HistoryHelper.filterAreas(playerToSend.pastAreas, oneHourAgo);
+      const oneDayAgo = (Date.now() - (24 * 60 * 60 * 1000));
+      const historyToSend = HistoryHelper.filterNetworth(playerToSend.netWorthSnapshots, oneDayAgo);
+      const areasToSend = HistoryHelper.filterAreas(playerToSend.pastAreas, oneDayAgo);
       playerToSend.netWorthSnapshots = historyToSend;
       playerToSend.pastAreas = areasToSend;
       this.electronService.compress(playerToSend, (data) => this._hubConnection.invoke('JoinParty', partyName, data));

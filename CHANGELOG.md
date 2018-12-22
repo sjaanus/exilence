@@ -1,11 +1,110 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
-## [0.8.4] - 2018-12-XX
+## [0.9.3] - XXXX-XX-XX
+- Reworked internal statistics endpoint to fix bug where the unintentionally prolonged party persistance.
+- Added flashing of taskbar icon on new Exlinece version.
+- Fixed a bug where prices were wrong for prophecies and divination cards with the same name.
+
+## [0.9.2] - 2018-12-20
+- Added support for scarabs/fragments/vessels and other common items in net worth
+- Added support for abyssal sockets when pricing uniques
+- Added proper backgrounds for elder/shaper items
+- Added a loading-indicator on the new login-screen
+- Added a popup to display important server-notifications
+- Fixed a bug where existing items would sometimes be mismatched
+- Minor style-tweaks to net worth table
+
+## [0.9.1] - 2018-12-20
+- Fixed a bug where the net worth pricing would stop when poe.watch is down
+- Fixed a bug where some bases would always be priced at 1 chaos
+- Fixed a bug where unidentified items were wrongly price
+
+## [0.9.0] - 2018-12-19
+- Added support for pricing of scarabs
+- Added support to price linked items
+- Added support to price 6-socketed items
+- Added support to price elder/shaper items
+- Added support for pricing gems (with level and quality)
+- Added support to price basetypes (with and without elder/shaper)
+- Added new column 'links' to net worth table
+- Added new column 'quality' to net worth table
+- Pricing of items should now be more accurate
+- Added a new, simplified launch-screen for existing users
+- Added persistance between restarts to mask-setting for groupnames
+- Fixed a bug where gain for the group summary was not updated properly
+
+## [0.8.12] - 2018-12-18
+- Optimized memory usage by dropping disposing of unused objects
+- Fixed a bug where the gain per hour in the currancy summary tab wasn't updated properly
+- Fixed a bug where items with zero quantity were listed in the gain-over-time table
+- Now displays two decimals for all net worth values
+- Now logs screenviews for Google Analytics properly
+- Now defaults to first 4 stashtabs instead of 10 (to support players with fewer tabs)
+- Fixed a bug where area export would crash if no areas were present
+- Added the ability to resize the networth popout
+- The networth popout is now hidden from the taskbar
+- Added CSV-export for income (Send report -> Full export)
+- Removed the default path for client.txt during login to avoid confusion
+- Ladder now displays top 10 if the current character is not present.
+
+## [0.8.11] - 2018-12-13
+- Added setting for gain-hours (you can now choose how many hours back calculations for hourly gain are based on)
+- Added new table in currency summary, that displays the net worth change over time (based on gain-hours)
+- Optimizations for retrieval of ladder
+- Now shows time from last snapshot for each player in currency summary
+- Reworked currency and currency summary tabs (more improvements to come)
+
+## [0.8.10] - 2018-12-13
+- Now rejoins your last group when reconnected after a disconnect (if they occurr within 25 seconds of each other)
+
+## [0.8.9] - 2018-12-11
+- Now flashes the taskbar icon when disconnected
+- Now includes items/stacks worth less than 1c in net worth (previously these were excluded)
+- Added inventory to net worth calculations (with setting in Settings -> Net worth)
+- Added equipment to net worth calculations (with setting in Settings -> Net worth)
+- Added ability to select item-value treshold (with setting Settings -> Net worth)
+- Now shows a separate disconnect-page if the cause is external (e.g if Path of Exile is down)
+- Changed the app-icon for Exilence
+- Fixed a bug where experience per hour was not displayed in the ladder-tab
+- Fixed a bug where the ladder-tab was not immediately updated when entering a party
+- Fixed a bug where a default-setting was not properly set for some options
+- Fixed a bug where analytics screen-views were inproperly triggered
+- Fixed a problem that was causing memory to leak (taking too much memory in long sessions)
+
+## [0.8.8] - 2018-12-09
+- Fixed a bug where some clients were sending too much data to the server
+- Fixed a bug where clients were requesting ladders too often
+- Fixed a bug where abyssal sockets were not displayed on items
+
+## [0.8.7] - 2018-12-08
+- Now shares the past 24 hours of data with your group, up from 1 hour
+- Ladders are now fetched 4 times as often as before (in effect after next server maintenance)
+- Added option to mask your groupname (for streamers etc), password-protection will be added in the future
+- Fixed a bug with pricing, where many items were not included even though good confidence
+- Fixed a bug where DPS on weapons was not shown correctly
+- Fixed a bug where too much net worth history was being sent
+- Fixed a bug where net worth snapshots would sometimes stop
+- Added better description for net worth tab if no history is present
+- Added changelog-link to dashboard
+- Now shows when last the snapshot occurred, next to gain/net worth
+- Changed text for pop out button, now called 'Use overlay'
+
+## [0.8.6] - 2018-12-07
+- Added a line of text to disconnected-page that tells you to accept ToS at pathofexile.com
+
+## [0.8.5] - 2018-12-07
+- Changed price-confidence to be more strict
+- Changed interval for fetching prices (now every 10 minutes, previously once every hour)
+- Minor QoL-improvements to login-process, with more descriptive text
+
+## [0.8.4] - 2018-12-06
+- Added support for new atlas (3.5)
 - Added option to include/exclude low confidence prices (excluded by default)
 - Reformatted timestamps for net worth graph
 - Changed the default stashtab-selection to the 10 first tabs, up from 5
 - Style-tweaks to disconnected-page
+- Fixed an error where Delve-leagues could still be selected
 - Improved tutorial-tooltips
 
 ## [0.8.3] - 2018-12-06

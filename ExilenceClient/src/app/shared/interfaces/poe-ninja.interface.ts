@@ -2,12 +2,13 @@ export enum NinjaTypes {
     CURRENCY = 'Currency',
     FRAGMENT = 'Fragment',
     FOSSILS = 'Fossil',
+    SCARAB = 'Scarab',
     RESONATORS = 'Resonator',
     ESSENCE = 'Essence',
     DIVINATION_CARD = 'DivinationCard',
     PROPHECY = 'Prophecy',
-    // SKILL_GEM = 'SkillGem',
-    // BASE_TYPE = 'BaseType',
+    SKILL_GEM = 'SkillGem',
+    BASE_TYPE = 'BaseType',
     HELMET_ENCHANT = 'HelmetEnchant',
     UNIQUE_MAP = 'UniqueMap',
     MAP = 'Map',
@@ -71,7 +72,23 @@ export interface NinjaLine {
     exaltedValue?: number;
     links?: number;
     receive?: any;
+    gemLevel?: number;
+    gemQuality?: number;
     pay?: any;
+    variant?: string;
+    icon: string;
+}
+
+export interface NinjaPriceInfo {
+    name: string;
+    value: number;
+    gemLevel: number;
+    gemQuality: number;
+    variation: string;
+    itemlevel: number;
+    baseType: string;
+    links: number;
+    icon: string;
 }
 
 export interface NinjaCurrencyDetail {

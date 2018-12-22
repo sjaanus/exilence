@@ -2,11 +2,13 @@
 using Exilence.Interfaces;
 using Exilence.Models;
 using Exilence.Models.Ladder;
+using Microsoft.ApplicationInsights;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Web;
@@ -15,11 +17,11 @@ namespace Exilence.Services
 {
     public class LadderService : ILadderService
     {
+        private TelemetryClient _telemetry;
+        private IRedisRepository _redisRepository;
         private readonly IHostingEnvironment _env;
         private readonly ILogger<LadderService> _log;
         private readonly IExternalService _externalService;
-        private IStoreRepository _storeRepository;
-        private IRedisRepository _redisRepository;
 
         private const string LadderUrl = "http://www.pathofexile.com/api/ladders";
         private const string LeagesUrl = "http://api.pathofexile.com/leagues?type=main&compact=1";
@@ -27,17 +29,17 @@ namespace Exilence.Services
         private const string TradeUrl = "http://api.pathofexile.com/public-stash-tabs";
 
         public LadderService(
+            IHostingEnvironment env,
+            TelemetryClient telemetry,
             ILogger<LadderService> log,
             IExternalService externalService,
-            IHostingEnvironment env,
-            IStoreRepository storeRepository,
             IRedisRepository redisRepository
             )
         {
             _log = log;
             _env = env;
+            _telemetry = telemetry;
             _externalService = externalService;
-            _storeRepository = storeRepository;
             _redisRepository = redisRepository;
         }
 
@@ -87,7 +89,8 @@ namespace Exilence.Services
             else
             {
                 LadderPlayerModel characterOnLadder = null;
-                if(league.Ladder != null) {  
+                if (league.Ladder != null)
+                {
                     characterOnLadder = league.Ladder.FirstOrDefault(t => t.Name == character);
                 }
 
@@ -110,19 +113,24 @@ namespace Exilence.Services
 
         public async Task UpdateLadders()
         {
-           var anyRunning = await _redisRepository.AnyLeageLadderRunning();
-            if (!anyRunning)
+            var leagues = await _redisRepository.GetAllLeaguesLadders();
+            if (leagues != null)
             {
-                var pendingLeague = await _redisRepository.GetLadderPendingUpdate();
-                if (pendingLeague != null)
+                var anyRunning = leagues.Any(t => t.Running);
+                var pendingLeague = leagues.OrderByDescending(t => t.Finished).LastOrDefault();
+
+                if (!anyRunning)
                 {
-                    var league = await _redisRepository.GetLeagueLadder(pendingLeague);
-                    if (league.Finished < DateTime.Now.AddMinutes(-5))
+                    if (pendingLeague != null)
                     {
-                        await UpdateLadder(pendingLeague);
+                        if (pendingLeague.Finished < DateTime.Now.AddMinutes(-5))
+                        {
+                            await UpdateLadder(pendingLeague.Name);
+                        }
                     }
                 }
             }
+            Hangfire.BackgroundJob.Schedule(() => UpdateLadders(), TimeSpan.FromMilliseconds(10000));
         }
 
         private async Task UpdateLadder(string leagueName)
@@ -134,7 +142,7 @@ namespace Exilence.Services
             var newLadder = new List<LadderPlayerModel>();
 
             var pages = Enumerable.Range(0, 25);
-            using (var rateGate = new RateGate(2, TimeSpan.FromSeconds(2))) // 1 second is ok but testing 2 for performance
+            using (var rateGate = new RateGate(2, TimeSpan.FromSeconds(1)))
             {
                 foreach (int page in pages)
                 {
@@ -182,7 +190,7 @@ namespace Exilence.Services
             if (newLadder.Count > 0)
             {
                 newLadder = CalculateStatistics(oldLadder, newLadder);
-              await _redisRepository.UpdateLeagueLadder(leagueName, newLadder);
+                await _redisRepository.UpdateLeagueLadder(leagueName, newLadder);
             }
         }
 
