@@ -15,12 +15,14 @@ namespace Exilence.Controllers
     {
         private ILogger<LadderController> _log;
         private ILadderService _ladderService;
+        private IStoreRepository _storeRepository;
         private IRedisRepository _redisRepository;
 
-        public LadderController( ILadderService ladderService, ILogger<LadderController> log, IRedisRepository redisRepository)
+        public LadderController( ILadderService ladderService, ILogger<LadderController> log, IStoreRepository storeRepository, IRedisRepository redisRepository)
         {
             _log = log;
             _ladderService = ladderService;
+            _storeRepository = storeRepository;
             _redisRepository = redisRepository;
         }
 

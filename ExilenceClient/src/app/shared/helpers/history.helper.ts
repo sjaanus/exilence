@@ -2,8 +2,7 @@ import { NetWorthSnapshot } from '../interfaces/income.interface';
 import { ExtendedAreaInfo } from '../interfaces/area.interface';
 
 export class HistoryHelper {
-    public static filterNetworth(networth: NetWorthSnapshot[], timestamp: number) {
-        let history = Object.assign([], networth);
+    public static filterNetworth(history: NetWorthSnapshot[], timestamp: number) {
         history = history.filter((snapshot: NetWorthSnapshot) => snapshot.timestamp > timestamp);
         if (history.length === 0) {
             history = [{
@@ -14,8 +13,7 @@ export class HistoryHelper {
         }
         return history;
     }
-    public static filterAreas(areas: ExtendedAreaInfo[], timestamp: number) {
-        let history = Object.assign([], areas);
+    public static filterAreas(history: ExtendedAreaInfo[], timestamp: number) {
         history = history.filter((area: ExtendedAreaInfo) => area.timestamp > timestamp);
         return history;
     }

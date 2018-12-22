@@ -45,7 +45,7 @@ export class ExternalService {
     return this.http.get('https://www.pathofexile.com/character-window/get-items' + parameters, { withCredentials: true }).catch(e => {
       if (e.status !== 403 && e.status !== 404) {
         this.logService.log('Could not character items, disconnecting!', null, true);
-        this.router.navigate(['/disconnected', true]);
+        this.router.navigate(['/disconnected']);
       }
       return Observable.of(null);
     });
@@ -61,7 +61,7 @@ export class ExternalService {
       .catch(e => {
         if (e.status !== 403 && e.status !== 404) {
           this.logService.log('Could not fetch character list, disconnecting!', null, true);
-          this.router.navigate(['/disconnected', true]);
+          this.router.navigate(['/disconnected']);
         }
         return Observable.of(null);
       });
@@ -73,7 +73,7 @@ export class ExternalService {
       .catch(e => {
         if (e.status !== 403 && e.status !== 404) {
           this.logService.log('Could not fetch leagues, disconnecting!', null, true);
-          this.router.navigate(['/disconnected', true]);
+          this.router.navigate(['/disconnected']);
         }
         return Observable.of(null);
       });
@@ -86,7 +86,7 @@ export class ExternalService {
       .catch(e => {
         if (e.status !== 403 && e.status !== 404) {
           this.logService.log('Could not fetch stashtab list, disconnecting!', null, true);
-          this.router.navigate(['/disconnected', true]);
+          this.router.navigate(['/disconnected']);
         }
         return Observable.of(null);
       });
@@ -100,7 +100,7 @@ export class ExternalService {
       .catch(e => {
         if (e.status !== 403 && e.status !== 404) {
           this.logService.log('Could not fetch stashtabs, disconnecting!', null, true);
-          this.router.navigate(['/disconnected', true]);
+          this.router.navigate(['/disconnected']);
         }
         return Observable.of(null);
       });
@@ -111,10 +111,6 @@ export class ExternalService {
     const parameters = `?league=${league}&accountName=${account}&tabIndex=${index}&tabs=1`;
     return this.http.get<Stash>('https://www.pathofexile.com/character-window/get-stash-items' + parameters)
       .catch(e => {
-        if (e.status === 500 || e.status === 502 || e.status === 503) {
-          this.logService.log('Could not validate, disconnecting!', null, true);
-          this.router.navigate(['/disconnected', true]);
-        }
         if (e.status !== 200) {
           return Observable.of(false);
         }

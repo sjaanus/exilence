@@ -37,7 +37,7 @@
 
         .networth-wrapper {
             float: left;
-            width: 20%;
+            width: 33.333%;
 
             .title {
                 font-size: 14px;
@@ -60,26 +60,26 @@
                     color: $networth-placeholder-color;
                 }
             }
-        } 
+        }
     }
 
     .table-outer-wrapper {
-        height: 44%;
+        height: 47%;
         bottom: 0px;
         width: calc(100% - 50px);
         margin-top: 25px;
         position: absolute;
 
         @media screen and (min-height: 1200px) {
-            height: 44%;
+            height: 55%;
         }
 
         @media screen and (max-height: 950px) {
-            height: 77%;
+            height: 80%;
         }
         
         .networth-table-wrapper {
-            height: calc(100% - 150px);
+            height: calc(100% - 95px);
             overflow-y: scroll;
         }
 
@@ -89,6 +89,6 @@
     }
 
     .full-height-table {
-        height: 77%;
+        height: 80%;
     }
 }

@@ -57,18 +57,13 @@ ipcMain.on('popout-window', (event, data: ExileWindowEvent) => {
     windows[window].destroy();
   }
   windows[window] = new BrowserWindow({
-    x: 200,
-    y: 200,
-    height: 80,
-    width: 200,
-    minWidth: 150,
-    minHeight: 75,
-    maxHeight: 90,
-    maxWidth: 230,
-    skipTaskbar: true,
+    x: 100,
+    y: 100,
+    height: 85,
+    width: 220,
     show: false,
     frame: false,
-    resizable: true,
+    resizable: false,
     alwaysOnTop: true,
     icon: path.join(__dirname, 'dist/assets/img/app-icon.png'),
   });
@@ -89,17 +84,11 @@ ipcMain.on('popout-window', (event, data: ExileWindowEvent) => {
 
 });
 
+
+
 ipcMain.on('relaunch', (event, window: ExileWindowEvent) => {
   app.quit();
   app.relaunch();
-});
-
-ipcMain.on('disconnect', function (event) {
-  windows[ExileWindowEnum.Main].flashFrame(true);
-});
-
-ipcMain.on('servermsg', function (event) {
-  windows[ExileWindowEnum.Main].flashFrame(true);
 });
 
 autoUpdater.logger = log;
@@ -162,8 +151,6 @@ function createWindow(windowType: ExileWindowEnum = ExileWindowEnum.Main) {
   });
 }
 
-
-
 try {
   autoUpdater.on('checking-for-update', () => {
     sendStatusToWindow('Checking for update...');
@@ -202,25 +189,15 @@ try {
 
   });
 
-
-
   // This method will be called when Electron has finished
   // initialization and is ready to create browser windows.
   // Some APIs can only be used after this event occurs.
   app.on('ready', () => {
-
     createWindow();
-
     autoUpdater.checkForUpdates();
-
     globalShortcut.register('Command+Shift+I', () => {
       windows[ExileWindowEnum.Main].openDevTools();
     });
-
-    windows[ExileWindowEnum.Main].on('focus', () => {
-      windows[ExileWindowEnum.Main].flashFrame(false);
-    });
-
   });
 
   // Quit when all windows are closed.

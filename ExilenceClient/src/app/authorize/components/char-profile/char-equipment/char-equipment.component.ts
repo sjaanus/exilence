@@ -1,4 +1,4 @@
-import { Component, Input, OnInit, AfterViewInit, OnDestroy } from '@angular/core';
+import { Component, Input, OnInit, AfterViewInit } from '@angular/core';
 
 import { Item } from '../../../../shared/interfaces/item.interface';
 import * as data from './equipment-slots';
@@ -8,19 +8,17 @@ import { PartyService } from '../../../../shared/providers/party.service';
 import { MatDialog } from '@angular/material';
 import { InfoDialogComponent } from '../../info-dialog/info-dialog.component';
 import { SettingsService } from '../../../../shared/providers/settings.service';
-import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-char-equipment',
   templateUrl: './char-equipment.component.html',
   styleUrls: ['./char-equipment.component.scss']
 })
-export class CharEquipmentComponent implements OnInit, OnDestroy, AfterViewInit {
+export class CharEquipmentComponent implements OnInit, AfterViewInit {
   @Input() items: Item[];
   equipment = data.equipmentSlots;
   flasks = data.flaskSlots;
   selectedPlayer: Player;
-  private selectedPlayerSub: Subscription;
   constructor(private electronService: ElectronService,
     private partyService: PartyService,
     private settingsService: SettingsService,
@@ -28,7 +26,7 @@ export class CharEquipmentComponent implements OnInit, OnDestroy, AfterViewInit 
   }
 
   ngOnInit() {
-    this.selectedPlayerSub = this.partyService.selectedPlayer.subscribe(res => {
+    this.partyService.selectedPlayer.subscribe(res => {
       this.selectedPlayer = res;
     });
   }
@@ -37,12 +35,6 @@ export class CharEquipmentComponent implements OnInit, OnDestroy, AfterViewInit 
     setTimeout(() => {
       this.openEquipmentDialog();
     });
-  }
-
-  ngOnDestroy() {
-    if (this.selectedPlayerSub !== undefined) {
-      this.selectedPlayerSub.unsubscribe();
-    }
   }
 
   openEquipmentDialog(): void {

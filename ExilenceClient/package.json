@@ -1,6 +1,6 @@
 {
   "name": "exilence",
-  "version": "0.9.2",
+  "version": "0.8.3",
   "author": {
     "name": "Viktor Gullmark",
     "email": "viktor.gullmark@hotmail.com"
@@ -52,7 +52,7 @@
     "node-key-sender": "github:viktorgullmark/node-key-sender",
     "poe-log-monitor": "github:viktorgullmark/poe-log-monitor",
     "robot-js": "^2.0.0",
-    "universal-analytics": "^0.4.20"
+    "universal-analytics": "^0.4.17"
   },
   "devDependencies": {
     "@angular-devkit/build-angular": "0.6.3",

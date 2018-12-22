@@ -5,7 +5,6 @@ using Exilence.Repositories;
 using Exilence.Services;
 using Hangfire;
 using Hangfire.MemoryStorage;
-using Microsoft.ApplicationInsights.Extensibility;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpOverrides;
@@ -30,7 +29,7 @@ namespace Exilence
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddApplicationInsightsTelemetry(Configuration);
+            services.AddDbContext<StoreContext>(options => options.UseSqlite("Data Source=store.db"));
 
             services.AddHangfire(c => c.UseMemoryStorage());
 
@@ -60,7 +59,7 @@ namespace Exilence
 
             services.AddScoped<ILadderService, LadderService>();
             services.AddHttpClient<IExternalService, ExternalService>();
-            //services.AddSingleton<IStoreRepository, StoreRepository>();
+            services.AddScoped<IStoreRepository, StoreRepository>();
             services.AddScoped<IRedisRepository, RedisRepository>();
         }
 
@@ -75,8 +74,6 @@ namespace Exilence
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
-                var telemetryConfig = app.ApplicationServices.GetService<Microsoft.ApplicationInsights.Extensibility.TelemetryConfiguration>();
-                telemetryConfig.DisableTelemetry = true;
             }
 
             app.UseMvc();
@@ -84,15 +81,10 @@ namespace Exilence
 
             GlobalConfiguration.Configuration.UseActivator(new HangfireActivator(serviceProvider));
 
-            var hangfireOpts = new BackgroundJobServerOptions
-            {
-                SchedulePollingInterval = TimeSpan.FromMilliseconds(1000)
-            };
-
-            app.UseHangfireServer(hangfireOpts);
+            app.UseHangfireServer();
             app.UseHangfireDashboard();
 
-            BackgroundJob.Schedule<ILadderService>(ls => ls.UpdateLadders(), TimeSpan.FromMilliseconds(5000));
+            RecurringJob.AddOrUpdate<ILadderService>(ls => ls.UpdateLadders(), Cron.MinuteInterval(1));
 
             app.UseSignalR(routes =>
             {

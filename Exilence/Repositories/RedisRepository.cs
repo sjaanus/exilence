@@ -3,12 +3,9 @@ using Exilence.Interfaces;
 using Exilence.Models;
 using Exilence.Models.Connection;
 using Exilence.Models.Ladder;
-using Exilence.Models.Statistics;
-using Microsoft.ApplicationInsights;
 using Microsoft.Extensions.Caching.Distributed;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -16,13 +13,11 @@ namespace Exilence.Repositories
 {
     public class RedisRepository : IRedisRepository
     {
-        private TelemetryClient _telemetry;
         private readonly IDistributedCache _cache;
 
-        public RedisRepository(IDistributedCache context, TelemetryClient telemetry)
+        public RedisRepository(IDistributedCache context)
         {
             _cache = context;
-            _telemetry = telemetry;
         }
 
         public async Task<List<LadderStoreModel>> GetAllLeaguesLadders()
@@ -44,14 +39,7 @@ namespace Exilence.Repositories
 
         public async Task<LadderStoreModel> GetLeagueLadder(string leagueName)
         {
-            var sw = new Stopwatch();
-            sw.Start();
-
             var compressedLeague = await _cache.GetAsync<string>($"ladder:{leagueName}");
-
-            var elapsed = sw.ElapsedMilliseconds / 1000;
-            _telemetry.GetMetric("RedisRepository.GetLeagueLadder").TrackValue(elapsed);
-
             if (compressedLeague != null)
             {
                 var league = CompressionHelper.Decompress<LadderStoreModel>(compressedLeague);
@@ -189,9 +177,6 @@ namespace Exilence.Repositories
 
         public async Task AddConnection(string connectionId, string partyName)
         {
-            var sw = new Stopwatch();
-            sw.Start();
-
             var connectionModel = new ConnectionModel()
             {
                 PartyName = partyName,
@@ -213,9 +198,6 @@ namespace Exilence.Repositories
 
             connections.Add(connectionModel);
             await _cache.SetAsync<List<ConnectionModel>>($"connections", connections);
-
-            var elapsed = sw.ElapsedMilliseconds / 1000;
-            _telemetry.GetMetric("RedisRepository.AddConnection").TrackValue(elapsed);
         }
 
         #endregion
@@ -227,61 +209,5 @@ namespace Exilence.Repositories
             return party;
         }
         #endregion
-
-
-        #region Statistics
-
-        public async Task<Statistics> GetStatistics()
-        {
-            var statistics = await _cache.GetAsync<Statistics>($"statistics");
-            return statistics;
-        }
-
-        public async Task UpdateStatistics(StatisticsActionEnum action)
-        {
-
-            var statistics = await _cache.GetAsync<Statistics>($"statistics");
-
-            if (statistics == null)
-            {
-                statistics = new Statistics();
-            }
-
-            switch (action)
-            {
-                case StatisticsActionEnum.IncrementParty:
-                    statistics.Parties++;
-                    break;
-                case StatisticsActionEnum.DecrementParty:
-                    statistics.Parties--;
-                    break;
-                case StatisticsActionEnum.IncrementPlayer:
-                    statistics.Players++;
-                    break;
-                case StatisticsActionEnum.DecrementPlayer:
-                    statistics.Players--;
-                    break;
-                case StatisticsActionEnum.IncrementConnection:
-                    statistics.Connections++;
-                    break;
-                case StatisticsActionEnum.DecrementConnection:
-                    statistics.Connections--;
-                    break;
-                default:
-                    break;
-            }
-
-            await _cache.SetAsync($"statistics", statistics);
-        }
-
-        public async Task ResetStatistics()
-        {
-            var statistics = new Statistics();
-            await _cache.SetAsync($"statistics", statistics);
-        }
-
-
-        #endregion
-
     }
 }

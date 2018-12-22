@@ -1,14 +1,13 @@
-import { Component, EventEmitter, Input, OnInit, Output, OnDestroy } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { colorSets as ngxChartsColorsets } from '@swimlane/ngx-charts/release/utils/color-sets';
 import * as d3 from 'd3';
 import * as moment from 'moment';
-import { Subscription } from 'rxjs/internal/Subscription';
 
 import { ChartSeries, ChartSeriesEntry } from '../../../shared/interfaces/chart.interface';
 import { Player } from '../../../shared/interfaces/player.interface';
-import { AccountService } from '../../../shared/providers/account.service';
 import { IncomeService } from '../../../shared/providers/income.service';
 import { PartyService } from '../../../shared/providers/party.service';
+import { AccountService } from '../../../shared/providers/account.service';
 
 
 @Component({
@@ -18,7 +17,7 @@ import { PartyService } from '../../../shared/providers/party.service';
 })
 
 
-export class IncomeComponent implements OnInit, OnDestroy {
+export class IncomeComponent implements OnInit {
   dateData: ChartSeries[] = [];
   @Input() player: Player;
   @Input() view = [1000, 400];
@@ -30,9 +29,7 @@ export class IncomeComponent implements OnInit, OnDestroy {
   public visible = true;
   private data = [];
 
-  public isSummary = false;
-  private selectedPlayerSub: Subscription;
-  private partySubscription: Subscription;
+  private isSummary = false;
 
   // line interpolation
   curveType = 'Linear';
@@ -46,14 +43,16 @@ export class IncomeComponent implements OnInit, OnDestroy {
   selectedColorScheme: string;
 
   constructor(
-    private partyService: PartyService
+    private incomeService: IncomeService,
+    private partyService: PartyService,
+    private accountService: AccountService
   ) {
   }
 
   ngOnInit() {
     if (this.player !== undefined) {
       this.updateGraph(this.player);
-      this.selectedPlayerSub = this.partyService.selectedPlayer.subscribe(res => {
+      this.partyService.selectedPlayer.subscribe(res => {
         this.dateData = [];
         this.data = [];
         if (res.netWorthSnapshots !== null) {
@@ -68,7 +67,7 @@ export class IncomeComponent implements OnInit, OnDestroy {
           this.updateGraph(p);
         }
       });
-      this.partySubscription = this.partyService.partyUpdated.subscribe(party => {
+      this.partyService.partyUpdated.subscribe(party => {
         if (party !== undefined) {
           this.dateData = [];
           this.data = [];
@@ -79,15 +78,6 @@ export class IncomeComponent implements OnInit, OnDestroy {
           });
         }
       });
-    }
-  }
-
-  ngOnDestroy() {
-    if (this.selectedPlayerSub !== undefined) {
-      this.selectedPlayerSub.unsubscribe();
-    }
-    if (this.partySubscription !== undefined) {
-      this.partySubscription.unsubscribe();
     }
   }
 
@@ -105,8 +95,8 @@ export class IncomeComponent implements OnInit, OnDestroy {
     const playerObj = Object.assign({}, player);
 
     if (this.isSummary) {
-      const oneDayAgo = (Date.now() - (24 * 60 * 60 * 1000));
-      playerObj.netWorthSnapshots = playerObj.netWorthSnapshots.filter(x => x.timestamp > oneDayAgo);
+      const oneHourAgo = (Date.now() - (1 * 60 * 60 * 1000));
+      playerObj.netWorthSnapshots = playerObj.netWorthSnapshots.filter(x => x.timestamp > oneHourAgo);
       if (playerObj.netWorthSnapshots.length === 0) {
         playerObj.netWorthSnapshots = [{
           timestamp: 0,
@@ -116,7 +106,7 @@ export class IncomeComponent implements OnInit, OnDestroy {
       }
     }
     const entry: ChartSeries = {
-      name: playerObj.character.name + ' (' + moment(playerObj.netWorthSnapshots[0].timestamp).fromNow() + ')',
+      name: playerObj.character.name,
       series: playerObj.netWorthSnapshots.map(snapshot => {
         const seriesEntry: ChartSeriesEntry = {
           name: new Date(snapshot.timestamp),

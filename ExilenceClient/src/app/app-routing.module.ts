@@ -27,7 +27,7 @@ const routes: Routes = [
         { path: '', redirectTo: '/authorized/dashboard', pathMatch: 'full' }
     ]},
 
-    { path: 'disconnected/:external', component: DisconnectedComponent },
+    { path: 'disconnected', component: DisconnectedComponent },
 
     // 404-page
     { path: '404', component: NotFoundComponent },

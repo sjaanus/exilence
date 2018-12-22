@@ -1,8 +1,6 @@
 import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
-
-import { AnalyticsService } from '../shared/providers/analytics.service';
 import { ElectronService } from '../shared/providers/electron.service';
+import { LadderService } from '../shared/providers/ladder.service';
 
 @Component({
   selector: 'app-disconnected',
@@ -10,25 +8,14 @@ import { ElectronService } from '../shared/providers/electron.service';
   styleUrls: ['./disconnected.component.scss']
 })
 export class DisconnectedComponent implements OnInit {
-  private sub: any;
-  public external: boolean;
+
   constructor(
     private electronService: ElectronService,
-    private route: ActivatedRoute,
-    private analyticsService: AnalyticsService
+    private ladderService: LadderService
   ) { }
 
   ngOnInit() {
-
-    this.sub = this.route.params.subscribe(params => {
-      this.external = JSON.parse(params['external']);
-    });
-
-    this.electronService.ipcRenderer.send('disconnect');
-
-    if (this.analyticsService.isTracking) {
-      this.analyticsService.sendScreenview('/disconnected');
-    }
+    this.ladderService.stopPollingLadder();
   }
 
   openLink(link: string) {

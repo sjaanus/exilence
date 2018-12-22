@@ -1,9 +1,5 @@
 @import "./../../../../../assets/styles/_variables.scss";
 
-.gain-dropdown {
-    max-width: 100%;
-}
-
 .char-wealth {
     width: 684px;
     height: calc(100% - 85px);
@@ -20,30 +16,27 @@
             display: none;
         }
     }
-    .button-area-wrapper {
-        padding: 25px 25px 0 25px;
-        .flex-area {
-            display: flex;
-            align-items: flex-end;
-            justify-content: end;
-            padding: 0;
-            width: 100%;
-            .right-aligned {
-                margin-left: auto;
-            }
-    
-            .extra-margin {
-                margin-right: 25px;
-            }
-    
-            .margin-left {
-                margin-left: 25px;
-            }
-            
-            &.wrapped {
-                margin-right: -25px;
-                margin-left: -25px;
-            }
+
+    .flex-area {
+        display: flex;
+        align-items: flex-end;
+        justify-content: end;
+        padding: 25px 25px 0px 25px;
+        .right-aligned {
+            margin-left: auto;
+        }
+
+        .extra-margin {
+            margin-right: 25px;
+        }
+
+        .margin-left {
+            margin-left: 25px;
+        }
+        
+        &.wrapped {
+            margin-right: -25px;
+            margin-left: -25px;
         }
     }
 
@@ -55,11 +48,13 @@
 
     .income-summary-wrapper {
         padding: 25px;
+        width: 100%;
         margin-bottom: 25px;
 
         .networth-wrapper {
             float: left;
-            width: 25%;
+            width: 33.333%;
+
             .title {
                 font-size: 14px;
 
@@ -80,17 +75,8 @@
                 .networth-placeholder {
                     color: $networth-placeholder-color;
                 }
-
-                .networth-snapshot {
-                    font-size: 13px;
-                    color: $networth-placeholder-color;
-                }
-            }
-            .snapshot {
-                float: right;
             }
         }
-        
     }
 
     .table-outer-wrapper {
@@ -101,16 +87,17 @@
         margin-right: 25px;
         margin-top: 25px;
         position: absolute;
+        padding-bottom: 25px;
         @media screen and (min-height: 1200px) {
             height: 55%;
         }
 
         @media screen and (max-height: 950px) {
-            height: 70%;
+            height: 80%;
         }
 
         .networth-table-wrapper {
-            height: calc(100% - 65px);
+            height: calc(100% - 95px);
             overflow-y: scroll;
         }
 

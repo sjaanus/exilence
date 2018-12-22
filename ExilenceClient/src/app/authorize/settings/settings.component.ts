@@ -1,4 +1,4 @@
-import { Component, Inject, OnInit, ViewChild, OnDestroy } from '@angular/core';
+import { Component, Inject, OnInit, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
 
 import { Keys } from '../../shared/interfaces/key.interface';
@@ -10,26 +10,22 @@ import { LogService } from '../../shared/providers/log.service';
 import { SessionService } from '../../shared/providers/session.service';
 import { SettingsService } from '../../shared/providers/settings.service';
 import { StashtabListComponent } from '../components/stashtab-list/stashtab-list.component';
-import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-settings',
   templateUrl: './settings.component.html',
   styleUrls: ['./settings.component.scss']
 })
-export class SettingsComponent implements OnInit, OnDestroy {
+export class SettingsComponent implements OnInit {
   form: FormGroup;
   selectedIndex = 0;
   alwaysOnTop = false;
   isResizable = false;
   hideTooltips = false;
   lowConfidencePricing = false;
-  characterPricing = false;
   sessionId: string;
   sessionIdValid: boolean;
   uploaded = false;
-  itemValueTreshold = 1;
-  gainHours = 1;
 
   // temporary arrays
   modifierKeys = [
@@ -81,8 +77,6 @@ export class SettingsComponent implements OnInit, OnDestroy {
 
   @ViewChild('table') table: StashtabListComponent;
 
-  private keybindSub: Subscription;
-
   constructor(@Inject(FormBuilder)
   fb: FormBuilder,
     private analyticsService: AnalyticsService,
@@ -97,7 +91,7 @@ export class SettingsComponent implements OnInit, OnDestroy {
       searchText: ['']
     });
 
-    this.keybindSub = this.keybindService.keybinds.subscribe((binds: any[]) => {
+    this.keybindService.keybinds.subscribe((binds: any[]) => {
       this.keybinds = binds.map(bind => ({
         triggerKeyCode: bind.keys.split('+')[1],
         modifierKeyCode: bind.keys.split('+')[0],
@@ -109,10 +103,6 @@ export class SettingsComponent implements OnInit, OnDestroy {
 
     this.sessionId = this.sessionService.getSession();
     this.sessionIdValid = this.settingsService.get('account.sessionIdValid');
-    this.itemValueTreshold =
-      this.settingsService.get('itemValueTreshold') !== undefined ? this.settingsService.get('itemValueTreshold') : 1;
-    this.gainHours =
-      this.settingsService.get('gainHours') !== undefined ? this.settingsService.get('gainHours') : 3;
     if (!this.sessionIdValid || this.sessionId === '') {
       this.selectedIndex = 1;
     }
@@ -142,17 +132,6 @@ export class SettingsComponent implements OnInit, OnDestroy {
     if (lowConfidencePricingSetting !== undefined) {
       this.lowConfidencePricing = lowConfidencePricingSetting;
     }
-
-    const characterePricingSetting = this.settingsService.get('characterPricing');
-    if (characterePricingSetting !== undefined) {
-      this.characterPricing = characterePricingSetting;
-    }
-  }
-
-  ngOnDestroy() {
-    if (this.keybindSub !== undefined) {
-      this.keybindSub.unsubscribe();
-    }
   }
 
   openLink(link: string) {
@@ -181,14 +160,6 @@ export class SettingsComponent implements OnInit, OnDestroy {
 
   search() {
     this.table.doSearch(this.form.controls.searchText.value);
-  }
-
-  toggleItemValueTreshold(event) {
-    this.settingsService.set('itemValueTreshold', event.value);
-  }
-
-  toggleGainHours(event) {
-    this.settingsService.set('gainHours', +event.value);
   }
 
   toggleAlwaysOnTop() {
@@ -231,14 +202,6 @@ export class SettingsComponent implements OnInit, OnDestroy {
       this.settingsService.set('lowConfidencePricing', true);
     } else {
       this.settingsService.set('lowConfidencePricing', false);
-    }
-  }
-
-  toggleCharacterPricing() {
-    if (this.characterPricing) {
-      this.settingsService.set('characterPricing', true);
-    } else {
-      this.settingsService.set('characterPricing', false);
     }
   }
 

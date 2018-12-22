@@ -11,8 +11,6 @@ export class AnalyticsService {
   private version: string;
   private appName: string;
 
-  public isTracking = false;
-
   private pastScreens: string[] = [];
 
   constructor(private logService: LogService) {
@@ -21,20 +19,18 @@ export class AnalyticsService {
   }
 
   startTracking(account: string) {
-    if (!this.isTracking) {
-      this.isTracking = true;
-      this.visitor = ua('UA-121704803-1', account.toLowerCase(), { strictCidFormat: false });
-      this.visitor.set('uid', account);
-      this.visitor.set('ds', 'app');
-      this.visitor.set('an', this.appName);
-      this.visitor.set('av', this.version);
-    }
+    this.visitor = ua('UA-121704803-1', account.toLowerCase(), { strictCidFormat: false });
+    this.visitor.set('uid', account);
+    this.visitor.set('ds', 'app');
+    this.visitor.set('an', this.appName);
+    this.visitor.set('av', this.version);
+
   }
 
   sendPageview(page: string) {
     this.visitor.pageview(page).send((err) => {
       if (err) {
-        this.logService.log('Sending pageview: ', err, false);
+        this.logService.log('Sending pageview: ', err, true);
       }
     });
   }
@@ -48,7 +44,7 @@ export class AnalyticsService {
 
     this.visitor.event(params).send((err) => {
       if (err) {
-        this.logService.log('Sending event: ', err, false);
+        this.logService.log('Sending event: ', err, true);
       }
     });
 
@@ -67,8 +63,10 @@ export class AnalyticsService {
   sendScreenview(screenName: string) {
     this.pastScreens.unshift(screenName);
 
-    this.visitor.screenview(screenName, this.appName, this.version).send((err) => {
-      this.logService.log('Sending screenview: ', screenName, false);
-    });
+    this.visitor.screenview(screenName, this.appName, this.version, (err) => {
+      if (err) {
+        this.logService.log('Sending screenview: ', err, true);
+      }
+    }).send();
   }
 }
