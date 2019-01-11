@@ -1,7 +1,7 @@
 import { app, BrowserWindow, dialog, globalShortcut } from 'electron';
+import * as fs from 'fs';
 import * as path from 'path';
 import * as url from 'url';
-import * as fs from 'fs';
 
 
 export interface ExileWindowEvent {
@@ -74,8 +74,8 @@ ipcMain.on('popout-window', (event, data: ExileWindowEvent) => {
     width: 200,
     minWidth: 150,
     minHeight: 75,
-    maxHeight: 90,
-    maxWidth: 230,
+    // maxHeight: 90,
+    // maxWidth: 230,
     skipTaskbar: true,
     show: false,
     frame: false,
@@ -85,7 +85,7 @@ ipcMain.on('popout-window', (event, data: ExileWindowEvent) => {
   });
 
   windows[window].loadURL(url.format({
-    pathname: path.join(__dirname, 'popout/networth.html'),
+    pathname: path.join(__dirname, `popout/${window}.html`),
     protocol: 'file:',
     slashes: true
   }));

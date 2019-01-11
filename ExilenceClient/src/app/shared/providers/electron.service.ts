@@ -52,6 +52,13 @@ export class ElectronService {
       this.structType = window.require('ref-struct');
 
       this.robot = window.require('robot-js');
+
+      const data = {
+        event: 'ladder',
+      };
+      this.ipcRenderer.send('popout-window', data);
+
+
     }
   }
 
