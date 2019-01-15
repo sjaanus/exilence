@@ -112,7 +112,7 @@ namespace Exilence
                     options.ApplicationMaxBufferSize = 50 * 1024 * 1024;
                     options.TransportMaxBufferSize = 50 * 1024 * 1024;
 
-                    options.Transports = Microsoft.AspNetCore.Http.Connections.HttpTransportType.WebSockets;
+                    //options.Transports = Microsoft.AspNetCore.Http.Connections.HttpTransportType.WebSockets;
                     options.WebSockets.CloseTimeout = TimeSpan.FromSeconds(40);
                 });
             });

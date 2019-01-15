@@ -106,6 +106,7 @@ export class PartyService implements OnDestroy {
       // .withUrl(AppConfig.url + 'hubs/party', {
         // skipNegotiation: true,
         // transport: signalR.HttpTransportType.WebSockets
+        // transport: signalR.HttpTransportType.ServerSentEvents
       // })
       .configureLogging(signalR.LogLevel.Information)
       .build();
@@ -288,18 +289,21 @@ export class PartyService implements OnDestroy {
   }
 
   initHubConnection() {
-    this.logService.log('Starting signalr connection');
-    this._hubConnection.start().then(() => {
-      console.log('Successfully established signalr connection!');
-      if (this.party !== undefined && this.currentPlayer !== undefined && this.party.name !== '') {
-        this.joinParty(this.party.name, this.currentPlayer);
-      }
-      this.reconnectAttempts = 0;
-    }).catch((err) => {
-      console.log(err);
-      this.logService.log('Could not connect to signalr');
-      this.reconnect();
-    });
+    // if connection is not already running, try to initiate new one
+    if (this._hubConnection.state === 0) {
+      this.logService.log('Starting signalr connection');
+      this._hubConnection.start().then(() => {
+        console.log('Successfully established signalr connection!');
+        if (this.party !== undefined && this.currentPlayer !== undefined && this.party.name !== '') {
+          this.joinParty(this.party.name, this.currentPlayer);
+        }
+        this.reconnectAttempts = 0;
+      }).catch((err) => {
+        console.log(err);
+        this.logService.log('Could not connect to signalr');
+        this.reconnect();
+      });
+    }
   }
 
   reconnect() {
@@ -315,7 +319,7 @@ export class PartyService implements OnDestroy {
     this.reconnectAttempts++;
   }
 
-  disconnect(reason: string) {
+  disconnect (reason: string) {
     this.forceClosed = true;
     this.logService.log(reason, null, true);
     this.accountService.clearCharacterList();

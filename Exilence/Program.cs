@@ -25,6 +25,7 @@ namespace Exilence
                 .UseKestrel(options =>
                 {
                     options.Listen(IPAddress.Loopback, 5678);
+                    options.Limits.MaxRequestBodySize = null;
                 })
                 .ConfigureLogging((hostingContext, builder) =>
                 {
