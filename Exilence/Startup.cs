@@ -59,6 +59,8 @@ namespace Exilence
             services
                 .AddSignalR(hubOptions => {
                     hubOptions.HandshakeTimeout = TimeSpan.FromSeconds(40);
+                    hubOptions.EnableDetailedErrors = true;
+ 
                 })
                 .AddStackExchangeRedis(Configuration.GetConnectionString("Redis"), options =>
                 {
@@ -109,6 +111,9 @@ namespace Exilence
                     // 30Kb message buffer
                     options.ApplicationMaxBufferSize = 50 * 1024 * 1024;
                     options.TransportMaxBufferSize = 50 * 1024 * 1024;
+
+                    options.Transports = Microsoft.AspNetCore.Http.Connections.HttpTransportType.WebSockets;
+                    options.WebSockets.CloseTimeout = TimeSpan.FromSeconds(40);
                 });
             });
         }

@@ -103,12 +103,17 @@ export class PartyService implements OnDestroy {
     this.initParty();
     this._hubConnection = new signalR.HubConnectionBuilder()
       .withUrl(AppConfig.url + 'hubs/party')
+      // .withUrl(AppConfig.url + 'hubs/party', {
+        // skipNegotiation: true,
+        // transport: signalR.HttpTransportType.WebSockets
+      // })
       .configureLogging(signalR.LogLevel.Information)
       .build();
 
     this.initHubConnection();
 
-    this._hubConnection.onclose(() => {
+    this._hubConnection.onclose((test) => {
+      console.log('close ' + test );
       this.logService.log('Signalr connection closed', null, true);
       this.reconnect();
     });
@@ -291,12 +296,14 @@ export class PartyService implements OnDestroy {
       }
       this.reconnectAttempts = 0;
     }).catch((err) => {
+      console.log(err);
       this.logService.log('Could not connect to signalr');
       this.reconnect();
     });
   }
 
   reconnect() {
+    console.log('recoonect ' + this.reconnectAttempts);
     if (this.reconnectAttempts > 5 && !this.forceClosed) {
       this.disconnect('Could not connect after 5 attempts.');
     } else {
